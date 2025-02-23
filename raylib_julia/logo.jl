@@ -2,13 +2,7 @@ include("raylib.jl")
 const s_w = 800
 const s_h = 450
 
-WHITE = Color(255,255,255,255)
-BLACK = Color(0,0,0,255)
-RAYWHITE = Color(245,245,245,255)
-JGREEN = Color(56,152,38,255)
-JRED = Color(203,60,51,255)
-JPURPLE = Color(149,88,178,255)
-JBLUE = Color(77,100,174,255)
+
 
 v1 = Vector2(s_w/2+70,s_h/2)
 v2 = Vector2(s_w/2 + 55, s_h/2 + 25)

@@ -31,8 +31,7 @@ include("raylib.jl")
 	#----------------------------------------------------------------------------------------
 	 const screenWidth = 800
 	 const screenHeight = 450
-     RAYWHITE = Color(245,245,245,255)
-     LIGHTGRAY = Color(200,200,200,255)
+
 	InitWindow( screenWidth, screenHeight, "raylib [core] example - basic window" )
 
 	SetTargetFPS( 60 )               #-- Set our game to run at 60 frames-per-second
