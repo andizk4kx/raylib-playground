@@ -1,0 +1,3 @@
+D:\testpool\ray_test\core_window_flags.ex:62
+        if (IsKeyPressed(KEY_F)) ToggleFullscreen();  // modifies window size..
+                                 ^ "then" expected
