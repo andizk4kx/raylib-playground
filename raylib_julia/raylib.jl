@@ -328,20 +328,20 @@ const npatch_three_patch_vertical = 1
 const npatch_three_patch_horizontal = 2
 # end enums
 # start structs
-struct Vector2
+mutable struct Vector2
     x::Cfloat
     y::Cfloat
 end
 
 
-struct Vector3
+mutable struct Vector3
     x::Cfloat
     y::Cfloat
     z::Cfloat
 end
 
 
-struct Vector4
+mutable struct Vector4
     x::Cfloat
     y::Cfloat
     z::Cfloat
@@ -349,7 +349,7 @@ struct Vector4
 end
 
 
-struct GLMatrix
+mutable struct GLMatrix
     m0::Cfloat
     m4::Cfloat
     m8::Cfloat
@@ -369,7 +369,7 @@ struct GLMatrix
 end
 
 
-struct Color
+mutable struct Color
     r::Cuchar
     g::Cuchar
     b::Cuchar
@@ -377,7 +377,7 @@ struct Color
 end
 
 
-struct Rectangle
+mutable struct Rectangle
     x::Cfloat
     y::Cfloat
     width::Cfloat
@@ -385,7 +385,7 @@ struct Rectangle
 end
 
 
-struct Image
+mutable struct Image
     data::Ptr{Cvoid}
     width::Cint
     height::Cint
@@ -394,7 +394,7 @@ struct Image
 end
 
 
-struct Texture
+mutable struct Texture
     id::Cuint
     width::Cint
     height::Cint
@@ -403,14 +403,14 @@ struct Texture
 end
 
 
-struct RenderTexture
+mutable struct RenderTexture
     id::Cuint
     texture::Texture
     depth::Texture
 end
 
 
-struct NPatchInfo
+mutable struct NPatchInfo
     source::Rectangle
     left::Cint
     top::Cint
@@ -420,7 +420,7 @@ struct NPatchInfo
 end
 
 
-struct GlyphInfo
+mutable struct GlyphInfo
     value::Cint
     offsetX::Cint
     offsetY::Cint
@@ -429,7 +429,7 @@ struct GlyphInfo
 end
 
 
-struct Font
+mutable struct Font
     baseSize::Cint
     glyphCount::Cint
     glyphPadding::Cint
@@ -439,7 +439,7 @@ struct Font
 end
 
 
-struct Camera3D
+mutable struct Camera3D
     position::Vector3
     target::Vector3
     up::Vector3
@@ -448,7 +448,7 @@ struct Camera3D
 end
 
 
-struct Camera2D
+mutable struct Camera2D
     offset::Vector2
     target::Vector2
     rotation::Cfloat
@@ -456,7 +456,7 @@ struct Camera2D
 end
 
 
-struct Mesh
+mutable struct Mesh
     vertexCount::Cint
     triangleCount::Cint
     vertices::Ptr{Cfloat}
@@ -475,40 +475,40 @@ struct Mesh
 end
 
 
-struct Shader
+mutable struct Shader
     id::Cuint
     locs::Ptr{Cint}
 end
 
 
-struct MaterialMap
+mutable struct MaterialMap
     texture::Texture
     color::Color
     value::Cfloat
 end
 
 
-struct Material
+mutable struct Material
     shader::Shader
     maps::Ptr{MaterialMap}
     params::Ptr{Cfloat}
 end
 
 
-struct Transform
+mutable struct Transform
     translation::Vector3
     rotation::Vector4
     scale::Vector3
 end
 
 
-struct BoneInfo
+mutable struct BoneInfo
     name::Ptr{Cchar}
     parent::Cint
 end
 
 
-struct Model
+mutable struct Model
     transform::GLMatrix
     meshCount::Cint
     materialCount::Cint
@@ -521,7 +521,7 @@ struct Model
 end
 
 
-struct ModelAnimation
+mutable struct ModelAnimation
     boneCount::Cint
     frameCount::Cint
     bones::Ptr{BoneInfo}
@@ -529,13 +529,13 @@ struct ModelAnimation
 end
 
 
-struct Ray
+mutable struct Ray
     position::Vector3
     direction::Vector3
 end
 
 
-struct RayCollision
+mutable struct RayCollision
     hit::Bool
     distance::Cfloat
     point::Vector3
@@ -543,13 +543,13 @@ struct RayCollision
 end
 
 
-struct BoundingBox
+mutable struct BoundingBox
     min::Vector3
     max::Vector3
 end
 
 
-struct Wave
+mutable struct Wave
     frameCount::Cuint
     sampleRate::Cuint
     sampleSize::Cuint
@@ -558,7 +558,7 @@ struct Wave
 end
 
 
-struct AudioStream
+mutable struct AudioStream
     buffer::Ptr{Cvoid}
     processor::Ptr{Cvoid}
     sampleRate::Cuint
@@ -567,13 +567,13 @@ struct AudioStream
 end
 
 
-struct Sound
+mutable struct Sound
     stream::AudioStream
     frameCount::Cuint
 end
 
 
-struct Music
+mutable struct Music
     stream::AudioStream
     frameCount::Cuint
     looping::Bool
@@ -582,7 +582,7 @@ struct Music
 end
 
 
-struct VrDeviceInfo
+mutable struct VrDeviceInfo
     hResolution::Cint
     vResolution::Cint
     hScreenSize::Cfloat
@@ -596,7 +596,7 @@ struct VrDeviceInfo
 end
 
 
-struct VrStereoConfig
+mutable struct VrStereoConfig
     projection::Ptr{GLMatrix}
     viewOffset::Ptr{GLMatrix}
     leftLensCenter::Ptr{Cfloat}
@@ -608,7 +608,7 @@ struct VrStereoConfig
 end
 
 
-struct FilePathList
+mutable struct FilePathList
     capacity::Cuint
     count::Cuint
     paths::Ptr{Ptr{Cchar}}
