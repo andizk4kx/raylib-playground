@@ -12,6 +12,8 @@
 *   Copyright (c) 2014-2025 Ramon Santamaria (@raysan5)
 *
 ********************************************************************************************/=#
+#adapted to julia 2025 Andreas Wagner
+
 using Printf
 include("raylib.jl")
 
