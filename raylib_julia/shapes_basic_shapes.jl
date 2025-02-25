@@ -70,7 +70,7 @@ include("raylib.jl")
             DrawRectangleLines(Int64(screenWidth/4*2) - 40, 320, 80, 60, ORANGE)   #// NOTE: Uses QUADS internally, not lines
     
             #// Triangle shapes and lines
-            DrawTriangle(v1,v2,v3, VIOLET);
+            DrawTriangle(v1,v2,v3, VIOLET)
             DrawTriangleLines(v4,v5,v6, DARKBLUE)
 
             #// Polygon shapes and lines
