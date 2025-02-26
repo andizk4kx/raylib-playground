@@ -12,7 +12,7 @@
 *   Copyright (c) 2020-2025 Ramon Santamaria (@raysan5)
 *
 ********************************************************************************************/
-
+--adapted to Phix 2025 Andreas Wagner
 include "raylib.e"
 
 //------------------------------------------------------------------------------------
@@ -42,17 +42,17 @@ include "raylib.e"
     */
 
     // Set configuration flags for window creation
-    //SetConfigFlags(FLAG_VSYNC_HINT | FLAG_MSAA_4X_HINT | FLAG_WINDOW_HIGHDPI);
-    InitWindow(screenWidth, screenHeight, "raylib [core] example - window flags");
+    //SetConfigFlags(FLAG_VSYNC_HINT | FLAG_MSAA_4X_HINT | FLAG_WINDOW_HIGHDPI)
+    InitWindow(screenWidth, screenHeight, "raylib [core] example - window flags")
 
     Vector2 ballPosition = new({ GetScreenWidth() / 2.0, GetScreenHeight() / 2.0 })
     Vector2 ballSpeed = new({ 5.0, 4.0 })
     Rectangle X1 = new({ 0, 0, GetScreenWidth(), GetScreenHeight() })
-    atom ballRadius = 20;
+    atom ballRadius = 20
 
-    int framesCounter = 0;
+    int framesCounter = 0
 
-    SetTargetFPS(60);             // Set our game to run at 60 frames-per-second
+    SetTargetFPS(60)              // Set our game to run at 60 frames-per-second
     //----------------------------------------------------------
 
     // Main game loop
@@ -79,7 +79,7 @@ include "raylib.e"
             if not IsWindowState(FLAG_WINDOW_HIDDEN) then  
             SetWindowState(FLAG_WINDOW_HIDDEN)
             end if
-            framesCounter = 0;
+            framesCounter = 0
         end if
 
         if (IsWindowState(FLAG_WINDOW_HIDDEN))
@@ -138,15 +138,15 @@ include "raylib.e"
         end if
 
         // Bouncing ball logic
-        ballPosition.x += ballSpeed.x;
-        ballPosition.y += ballSpeed.y;
+        ballPosition.x += ballSpeed.x
+        ballPosition.y += ballSpeed.y
         if (((ballPosition.x >= (GetScreenWidth() - ballRadius)) or (ballPosition.x <= ballRadius))) then ballSpeed.x *= -1 end if
         if (((ballPosition.y >= (GetScreenHeight() - ballRadius)) or (ballPosition.y <= ballRadius))) then ballSpeed.y *= -1 end if
         //-----------------------------------------------------
 
         // Draw
         //-----------------------------------------------------
-        BeginDrawing();
+        BeginDrawing()
 
         if (IsWindowState(FLAG_WINDOW_TRANSPARENT)) then ClearBackground(BLANK)
         else ClearBackground(RAYWHITE)
@@ -207,13 +207,13 @@ include "raylib.e"
         if (IsWindowState(FLAG_MSAA_4X_HINT)) then DrawText("FLAG_MSAA_4X_HINT: on", 10, 360, 10, LIME)
         else DrawText("FLAG_MSAA_4X_HINT: off", 10, 360, 10, MAROON) end if
 
-        EndDrawing();
+        EndDrawing()
         //-----------------------------------------------------
     end while
 
     // De-Initialization
     //---------------------------------------------------------
-    CloseWindow();        // Close window and OpenGL context
+    CloseWindow()         // Close window and OpenGL context
     //----------------------------------------------------------
 
 

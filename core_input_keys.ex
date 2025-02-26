@@ -12,7 +12,7 @@
 *   Copyright (c) 2014-2025 Ramon Santamaria (@raysan5)
 *
 ********************************************************************************************/
-
+--adapted to Phix 2025 Andreas Wagner
 include "raylib.e"
 
 //------------------------------------------------------------------------------------
@@ -22,10 +22,10 @@ procedure main()
 
     // Initialization
     //--------------------------------------------------------------------------------------
-    int screenWidth = 800;
-    int screenHeight = 450;
+    int screenWidth = 800
+    int screenHeight = 450
 
-    InitWindow(screenWidth, screenHeight, "raylib [core] example - keyboard input");
+    InitWindow(screenWidth, screenHeight, "raylib [core] example - keyboard input")
 
     Vector2 ballPosition = new({ screenWidth/2, screenHeight/2 })
     Vector2 ballSpeed = new({ 2.0, 2.0 })
@@ -66,8 +66,8 @@ procedure main()
             ClearBackground(RAYWHITE);
 
             DrawText("move the ball with arrow keys", 10, 10, 20, DARKGRAY)
-            DrawText("Press Keypad [+/-] to increase/decrease Ballspeed", 10, 30, 20, DARKGRAY);
-            DrawText(sprintf("Ballspeed :[%d,%d]",{ballSpeed.x,ballSpeed.y}), 10, 50, 20, DARKGRAY);
+            DrawText("Press Keypad [+/-] to increase/decrease Ballspeed", 10, 30, 20, DARKGRAY)
+            DrawText(sprintf("Ballspeed :[%d,%d]",{ballSpeed.x,ballSpeed.y}), 10, 50, 20, DARKGRAY)
             DrawCircleV(ballPosition,ballRadius, MAROON)
 
         EndDrawing()

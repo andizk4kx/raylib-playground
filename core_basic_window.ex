@@ -19,7 +19,7 @@
 *   Copyright (c) 2013-2022 Ramon Santamaria (@raysan5)
 *
 ********************************************************************************************/
-
+--adapted to Phix 2025 Andreas Wagner
 include raylib.e
 
 --------------------------------------------------------------------------------------
@@ -27,40 +27,40 @@ include raylib.e
 --------------------------------------------------------------------------------------
 procedure main()
 
-	-- Initialization
-	----------------------------------------------------------------------------------------
-	integer screenWidth = 800
-	integer screenHeight = 450
+        -- Initialization
+        ----------------------------------------------------------------------------------------
+        integer screenWidth = 800
+        integer screenHeight = 450
 
-	InitWindow( screenWidth, screenHeight, "raylib [core] example - basic window" )
+        InitWindow( screenWidth, screenHeight, "raylib [core] example - basic window" )
 
-	SetTargetFPS( 60 )               -- Set our game to run at 60 frames-per-second
-	----------------------------------------------------------------------------------------
+        SetTargetFPS( 60 )               -- Set our game to run at 60 frames-per-second
+        ----------------------------------------------------------------------------------------
 
-	-- Main game loop
-	while not WindowShouldClose() do    -- Detect window close button or ESC key
+        -- Main game loop
+        while not WindowShouldClose() do    -- Detect window close button or ESC key
 
-		-- Update
-		------------------------------------------------------------------------------------
-		-- TODO: Update your variables here
-		------------------------------------------------------------------------------------
+                -- Update
+                ------------------------------------------------------------------------------------
+                -- TODO: Update your variables here
+                ------------------------------------------------------------------------------------
 
-		-- Draw
-		------------------------------------------------------------------------------------
-		BeginDrawing()
+                -- Draw
+                ------------------------------------------------------------------------------------
+                BeginDrawing()
 
-		ClearBackground( RAYWHITE )
+                ClearBackground( RAYWHITE )
 
-		DrawText( "Congrats! You created your first window!", 190, 200, 20, LIGHTGRAY )
+                DrawText( "Congrats! You created your first window!", 190, 200, 20, LIGHTGRAY )
 
-		EndDrawing()
-		------------------------------------------------------------------------------------
-	end while
+                EndDrawing()
+                ------------------------------------------------------------------------------------
+        end while
 
-	-- De-Initialization
-	----------------------------------------------------------------------------------------
-	CloseWindow()        -- Close window and OpenGL context
-	----------------------------------------------------------------------------------------
+        -- De-Initialization
+        ----------------------------------------------------------------------------------------
+        CloseWindow()        -- Close window and OpenGL context
+        ----------------------------------------------------------------------------------------
 
 end procedure
 

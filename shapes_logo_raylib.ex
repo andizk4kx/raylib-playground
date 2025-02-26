@@ -12,6 +12,7 @@
 *   Copyright (c) 2014-2025 Ramon Santamaria (@raysan5)
 *
 ********************************************************************************************/
+--adapted to Phix 2025 Andreas Wagner
 
 include "raylib.e"
 
@@ -21,12 +22,12 @@ include "raylib.e"
 
     // Initialization
     //--------------------------------------------------------------------------------------
-    constant int screenWidth = 800;
-    constant int screenHeight = 450;
+    constant int screenWidth = 800
+    constant int screenHeight = 450
 
-    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - raylib logo using shapes");
+    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - raylib logo using shapes")
 
-    SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
+    SetTargetFPS(60)                // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
     // Main game loop
@@ -47,7 +48,7 @@ include "raylib.e"
             DrawRectangle(screenWidth/2 - 112, screenHeight/2 - 112, 224, 224, RAYWHITE)
             DrawText("raylib", screenWidth/2 - 44, screenHeight/2 + 48, 50, BLACK)
 
-            DrawText("this is NOT a texture!", 350, 370, 10, GRAY);
+            DrawText("this is NOT a texture!", 350, 370, 10, GRAY)
 
         EndDrawing()
         //----------------------------------------------------------------------------------

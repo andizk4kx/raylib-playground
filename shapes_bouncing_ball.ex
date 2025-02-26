@@ -12,7 +12,7 @@
 *   Copyright (c) 2013-2025 Ramon Santamaria (@raysan5)
 *
 ********************************************************************************************/
-
+--adapted to Phix 2025 Andreas Wagner
 include raylib.e
 
 //------------------------------------------------------------------------------------
@@ -21,8 +21,8 @@ include raylib.e
 
     // Initialization
     //---------------------------------------------------------
-    atom screenWidth = 800;
-    atom screenHeight = 450;
+    atom screenWidth = 800
+    atom screenHeight = 450
 
     SetConfigFlags(FLAG_MSAA_4X_HINT)
     InitWindow(screenWidth, screenHeight, "raylib [shapes] example - bouncing ball")
@@ -46,12 +46,12 @@ include raylib.e
 
         if not pause then
         
-            ballPosition.x += ballSpeed.x;
-            ballPosition.y += ballSpeed.y;
+            ballPosition.x += ballSpeed.x
+            ballPosition.y += ballSpeed.y
 
             // Check walls collision for bouncing
-            if ((ballPosition.x >= (GetScreenWidth() - ballRadius)) || (ballPosition.x <= ballRadius)) then  ballSpeed.x *= -1.0 end if
-            if ((ballPosition.y >= (GetScreenHeight() - ballRadius)) || (ballPosition.y <= ballRadius)) then ballSpeed.y *= -1.0 end if
+            if ((ballPosition.x >= (GetScreenWidth() - ballRadius)) or (ballPosition.x <= ballRadius)) then  ballSpeed.x *= -1.0 end if
+            if ((ballPosition.y >= (GetScreenHeight() - ballRadius)) or (ballPosition.y <= ballRadius)) then ballSpeed.y *= -1.0 end if
         
         else framesCounter +=1
         end if

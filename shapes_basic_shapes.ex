@@ -12,6 +12,7 @@
 *   Copyright (c) 2014-2025 Ramon Santamaria (@raysan5)
 *
 ********************************************************************************************/
+--adapted to Phix 2025 Andreas Wagner
 
 include raylib.e
 
