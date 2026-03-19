@@ -1,4 +1,12 @@
+<<<<<<< HEAD
 ### category: core [xx]
+=======
+\### category: core \[xx]
+
+
+Examples using raylib \[core](../src/rcore.c) module platform functionality: window creation, inputs, drawing modes and system functionality.
+
+>>>>>>> 3ee4fb149d834b8afe9a2cee6973e5948a3ac79e
 
 Examples using raylib [core](../src/rcore.c) module platform functionality: window creation, inputs, drawing modes and system functionality.
 
