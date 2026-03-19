@@ -267,35 +267,69 @@ end function
 
 function peek_camera3d(atom mem)
 sequence camera3D=Tcamera3D
---  poke(mem,atom_to_float32(camera3D[1][1]))   
     camera3D[1][1]=float32_to_atom(peek({mem,4}))
---  poke(mem+4,atom_to_float32(camera3D[1][2]))
     camera3D[1][2]=float32_to_atom(peek({mem+4,4}))
---  poke(mem+8,atom_to_float32(camera3D[1][3]))
     camera3D[1][3]=float32_to_atom(peek({mem+8,4}))
---
---  poke(mem+12,atom_to_float32(camera3D[2][1]))
+
+
     camera3D[2][1]=float32_to_atom(peek({mem+12,4}))
---  poke(mem+16,atom_to_float32(camera3D[2][2]))
     camera3D[2][2]=float32_to_atom(peek({mem+16,4}))
---  poke(mem+20,atom_to_float32(camera3D[2][3]))
     camera3D[2][3]=float32_to_atom(peek({mem+20,4}))
---
---  poke(mem+24,atom_to_float32(camera3D[3][1]))
+
     camera3D[3][1]=float32_to_atom(peek({mem+24,4}))
---  poke(mem+28,atom_to_float32(camera3D[3][2]))
+
     camera3D[3][2]=float32_to_atom(peek({mem+28,4}))
---  poke(mem+32,atom_to_float32(camera3D[3][3]))
     camera3D[3][3]=float32_to_atom(peek({mem+32,4}))
---
---  poke(mem+36,atom_to_float32(camera3D[4]))
+
+
     camera3D[4]=float32_to_atom(peek({mem+36,4}))
---  poke(mem+40,atom_to_float32(camera3D[5]))
     camera3D[5]=float32_to_atom(peek({mem+40,4}))
---  poke4(mem+44,0) --padding
 return camera3D
 end function
 
+constant size_audiostream=32 --MUST be padded for Music
+function poke_stream(atom mem,sequence stream)
+    poke8(mem,stream[1])
+    poke8(mem+8,stream[2])
+    poke4(mem+16,stream[3])
+    poke4(mem+20,stream[4])
+    poke4(mem+24,stream[5])
+    poke4(mem+28,0)
+return mem
+end function
+
+function peek_stream(atom mem)
+sequence stream={0,0,0,0,0}
+    stream[1]=peek8u(mem)
+    stream[2]=peek8u(mem+8)
+    stream[3]=peek4u(mem+16)
+    stream[4]=peek4u(mem+20)
+    stream[5]=peek4u(mem+24)
+return stream
+end function
+
+constant size_music=64
+function poke_music(atom mem,sequence music)
+atom dummy
+dummy=poke_stream(mem,music[1])
+    poke4(mem+32,music[2])
+    poke4(mem+36,music[3])
+    poke4(mem+40,music[4])
+    poke8(mem+44,music[5])
+return mem
+end function
+
+constant Tmusic = {{0,0,0,0,0},0,0,0,0}
+function peek_music(atom mem)
+sequence music=Tmusic
+    music[1]=peek_stream(mem)
+    music[2]=peek4u(mem+32)
+    music[3]=peek4u(mem+36)
+    music[4]=peek4s(mem+40)
+    music[5]=peek8s(mem+44)
+
+return music
+end function
 -- end little helper
 --Colors
 global constant LIGHTGRAY = {200,200,200,255},
@@ -3800,7 +3834,7 @@ public procedure CloseAudioDevice()
 end procedure
 
 public function IsAudioDeviceReady()
-        return c_func(xIsAudioDeviceReady,{})
+        return and_bits(c_func(xIsAudioDeviceReady,{}),1)
 end function
 
 public procedure SetMasterVolume(atom vol)
@@ -3970,7 +4004,7 @@ public procedure UnloadWaveSamples(atom samp)
 end procedure
 
 --Music management functions
-public constant xLoadMusicStream = define_c_func(ray,"+LoadMusicStream",{C_STRING},Music),
+public constant xLoadMusicStream = define_c_func(ray,"+LoadMusicStream",{C_HPTR,C_STRING},Music),
                                 xLoadMusicStreamFromMemory = define_c_func(ray,"+LoadMusicStreamFromMemory",{C_STRING,C_POINTER,C_INT},Music),
                                 xIsMusicValid = define_c_func(ray,"+IsMusicValid",{Music},C_BOOL),
                                 xUnloadMusicStream = define_c_proc(ray,"+UnloadMusicStream",{Music}),
@@ -3988,7 +4022,15 @@ public constant xLoadMusicStream = define_c_func(ray,"+LoadMusicStream",{C_STRIN
                                 xGetMusicTimePlayed = define_c_func(ray,"+GetMusicTimePlayed",{Music},C_FLOAT)
                                 
 public function LoadMusicStream(sequence fName)
-        return c_func(xLoadMusicStream,{fName})
+atom mus=allocate(size_music)
+atom pstr=allocate_string(fName)
+atom ptr
+sequence music
+        ptr= c_func(xLoadMusicStream,{mus,pstr})
+music=peek_music(ptr)
+free(pstr)
+free(mus)
+return music
 end function
 
 public function LoadMusicStreamFromMemory(sequence fileType,atom data,atom size)
@@ -3996,59 +4038,87 @@ public function LoadMusicStreamFromMemory(sequence fileType,atom data,atom size)
 end function
 
 public function IsMusicValid(sequence music)
-        return c_func(xIsMusicValid,{music})
+atom mus=allocate(size_music)
+        return and_bits(c_func(xIsMusicValid,{poke_music(mus,music)}),1)
+free(mus)
 end function
 
 public procedure UnloadMusicStream(sequence music)
-        c_proc(xUnloadMusicStream,{music})
+atom mus=allocate(size_music)
+        c_proc(xUnloadMusicStream,{poke_music(mus,music)})
+free(mus)
 end procedure
 
 public procedure PlayMusicStream(sequence music)
-        c_proc(xPlayMusicStream,{music})
+atom mus=allocate(size_music)
+        c_proc(xPlayMusicStream,{poke_music(mus,music)})
+free(mus)
 end procedure
 
 public function IsMusicStreamPlaying(sequence music)
-        return c_func(xIsMusicStreamPlaying,{music})
+atom mus=allocate(size_music)
+        return c_func(xIsMusicStreamPlaying,{poke_music(mus,music)})
+free(music)
 end function
 
 public procedure UpdateMusicStream(sequence music)
-        c_proc(xUpdateMusicStream,{music})
+atom mus=allocate(size_music)
+        c_proc(xUpdateMusicStream,{poke_music(mus,music)})
+free(mus)
 end procedure
 
 public procedure StopMusicStream(sequence music)
-        c_proc(xStopMusicStream,{music})
+atom mus=allocate(size_music)
+        c_proc(xStopMusicStream,{poke_music(mus,music)})
+free(mus)
 end procedure
 
 public procedure PauseMusicStream(sequence music)
-        c_proc(xPauseMusicStream,{music})
+atom mus=allocate(size_music)
+        c_proc(xPauseMusicStream,{poke_music(mus,music)})
+free(mus)
 end procedure
 
 public procedure ResumeMusicStream(sequence music)
-        c_proc(xResumeMusicStream,{music})
+atom mus=allocate(size_music)
+        c_proc(xResumeMusicStream,{poke_music(mus,music)})
+free(mus)
 end procedure
 
 public procedure SeekMusicStream(sequence music,atom pos)
-        c_proc(xSeekMusicStream,{music,pos})
+atom mus=allocate(size_music)
+        c_proc(xSeekMusicStream,{poke_music(mus,music),pos})
+free(mus)
 end procedure
 
 public procedure SetMusicVolume(sequence music,atom vol)
-        c_proc(xSetMusicVolume,{music,vol})
+atom mus=allocate(size_music)
+        c_proc(xSetMusicVolume,{poke_music(mus,music),vol})
+free(mus)
 end procedure
 
 public procedure SetMusicPitch(sequence music,atom pit)
-        c_proc(xSetMusicPitch,{music,pit})
+atom mus=allocate(size_music)
+        c_proc(xSetMusicPitch,{poke_music(mus,music),pit})
+free(mus)
 end procedure
 
 public procedure SetMusicPan(sequence music,atom pan)
-        c_proc(xSetMusicPan,{music,pan})
+atom mus=allocate(size_music)
+        c_proc(xSetMusicPan,{poke_music(mus,music),pan})
+free(mus)
 end procedure
 
 public function GetMusicTimeLength(sequence music)
-        return c_func(xGetMusicTimeLength,{music})
+atom mus=allocate(size_music)
+        return c_func(xGetMusicTimeLength,{poke_music(mus,music)})
+free(mus)
 end function
 
 public function GetMusicTimePlayed(sequence music)
-        return c_func(xGetMusicTimePlayed,{music})
+atom mus=allocate(size_music)
+        return c_func(xGetMusicTimePlayed,{poke_music(mus,music)})
+free(mus)
 end function
 
 --Audiostream functions
