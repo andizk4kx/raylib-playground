@@ -31,8 +31,8 @@ constant true=1
 
     -- Initialization
     ----------------------------------------------------------------------------------------
-    constant screenWidth = 800 *1.5
-    constant screenHeight = 450 *1.5
+    constant screenWidth = 800 
+    constant screenHeight = 450 
     enum x,y,z
     
     InitWindow(screenWidth, screenHeight, "raylib [shapes] example - starfield effect") 

@@ -173,7 +173,6 @@ enum x,y,width,height
             pause=GuiToggle({ 640, 70, 120, 20}, sprintf("Pause",1), {2,pause})
             GuiSetStyle(LABEL, TEXT_COLOR_NORMAL, ColorToInt(LIME))
             angle=GuiSliderBar({ 640, 40, 120, 20}, "Angle", sprintf("%.0d°", angle), {1,angle}, 0.0, 360.0)
-            ?pause
             -- Angle values panel
     atom dummy = GuiGroupBox({ 620, 110, 140, 170}, "Angle Values")
             --------------------------------------------------------------------------------

@@ -3200,7 +3200,9 @@ public procedure SetTextLineSpacing(atom space)
 end procedure
 
 public function MeasureText(sequence text,atom size)
-        return c_func(xMeasureText,{text,size})
+atom pstr=allocate_string(text)
+        return c_func(xMeasureText,{pstr,size})
+free(pstr)
 end function
 
 public function MeasureTextEx(sequence font,sequence text,atom size,atom space)
