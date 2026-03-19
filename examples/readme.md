@@ -1,7 +1,6 @@
 \### category: core \[xx]
 
 
-
 Examples using raylib \[core](../src/rcore.c) module platform functionality: window creation, inputs, drawing modes and system functionality.
 
 
