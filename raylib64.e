@@ -191,6 +191,7 @@ sequence result={0,0,0,0,0}
     return result
 end function
 
+constant Ttexture={0,0,0,0,0}
 constant size_texture=24 -- padded to 64bit 8-bytes
 function poke_texture(atom addr,sequence texture)
     poke4(addr,texture[1])
@@ -312,8 +313,8 @@ constant size_music=64
 function poke_music(atom mem,sequence music)
 atom dummy
 dummy=poke_stream(mem,music[1])
-    poke4(mem+32,music[2])
-    poke4(mem+36,music[3])
+    poke4(mem+32,music[2]) --framecount
+    poke4(mem+36,music[3]) --bool looping
     poke4(mem+40,music[4])
     poke8(mem+44,music[5])
 return mem
@@ -323,8 +324,8 @@ constant Tmusic = {{0,0,0,0,0},0,0,0,0}
 function peek_music(atom mem)
 sequence music=Tmusic
     music[1]=peek_stream(mem)
-    music[2]=peek4u(mem+32)
-    music[3]=peek4u(mem+36)
+    music[2]=peek4u(mem+32) --framecount
+    music[3]=peek(mem+36) -- bool looping
     music[4]=peek4s(mem+40)
     music[5]=peek8s(mem+44)
 
