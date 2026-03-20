@@ -17,7 +17,7 @@ include "../../raylib64.e"
 --/*
 constant true=1
 constant false=0
-include raylib.e
+--include raylib.e
 --*/
 
 --------------------------------------------------------------------------------------
@@ -34,7 +34,6 @@ include raylib.e
     InitAudioDevice()               -- Initialize audio device
 
     sequence music = LoadMusicStream("resources/country.mp3")
-    ?music
     PlayMusicStream(music)
 
     atom timePlayed = 0.0       -- Time played normalized [0.0f..1.0f]

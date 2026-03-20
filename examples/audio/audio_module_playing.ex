@@ -83,7 +83,7 @@ enum x,y,looping=3
         -- Update
         ------------------------------------------------------------------------------------
         UpdateMusicStream(music)       -- Update music buffer with new stream data
-
+    
         -- Restart music playing (stop and play)
         if (IsKeyPressed(KEY_SPACE))
         then
@@ -164,7 +164,7 @@ enum x,y,looping=3
             DrawText("PRESS P TO PAUSE/RESUME", 40, 70, 20, BLACK)
             DrawText("PRESS UP/DOWN TO CHANGE SPEED", 40, 100, 20, BLACK)
             DrawText(sprintf("SPEED: %f", pitch), 40, 130, 20, MAROON)
-
+            --DrawFPS(10,10)
         EndDrawing()
         ------------------------------------------------------------------------------------
     end while
