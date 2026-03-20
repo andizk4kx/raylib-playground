@@ -331,6 +331,83 @@ sequence music=Tmusic
 
 return music
 end function
+
+
+-- Helper (kind off a primitive state-manager) for GUI not in Raylib API handling for more Phix/Euphoria Style coding (less Pointer)
+sequence ids={{0,allocate(8)}}
+function get_addr_(atom id_) --get adress of allready existing ID
+atom result
+for i=1 to length(ids) 
+do
+    if (id_ = ids[i][1])
+    then
+        result = ids[i][2]
+        exit
+    else 
+        result = -1
+    end if  
+end for
+return result
+end function
+
+-- Sucht eine freie ID im Bereich [from, to]
+function make_unique_id(integer from_id, integer to_id)
+    integer candidate = from_id
+    integer found
+    while candidate <= to_id do
+        found = 0
+        for i = 1 to length(ids) do
+            if ids[i][1] = candidate then
+                found = 1
+                exit -- ID belegt, brich innere Schleife ab
+            end if
+        end for
+        if not found then
+            return candidate -- Erste freie ID gefunden!
+        end if
+                candidate += 1
+    end while
+    return -1 -- Fehler: Bereich voll
+end function
+
+
+function get_addr(sequence idval) -- Set Value in existing ID memory or create new ID and allocate memory return the adress
+atom addr=get_addr_(idval[1])
+if (addr>0) then
+    poke(addr,atom_to_float32(idval[2]))
+else
+    ids=append(ids,{idval[1],allocate(8)})
+    addr=get_addr_(idval[1])
+    poke(addr,atom_to_float32(idval[2]))  -- for setting a start value
+end if
+return addr
+end function
+
+function get_addr_bool(sequence idval)
+atom addr=get_addr_(idval[1])
+if (addr>0) then
+    poke4(addr,idval[2])
+else
+    ids=append(ids,{idval[1],allocate(8)})
+    addr=get_addr_(idval[1])
+    poke4(addr,idval[2])  -- for setting a start value
+end if
+return addr
+end function
+
+function get_addr_music(sequence idval)
+atom addr=get_addr_(idval[1])
+if (addr>0) then
+    return poke_music(addr,idval[2])
+else
+    ids=append(ids,{idval[1],allocate(64)})
+    addr=get_addr_(idval[1])
+    return poke_music(addr,idval[2])  -- for setting a start value
+end if
+--return addr
+end function
+
+---------------------------------------------------------------------------------------------------------------
 -- end little helper
 --Colors
 global constant LIGHTGRAY = {200,200,200,255},
@@ -4021,17 +4098,18 @@ public constant xLoadMusicStream = define_c_func(ray,"+LoadMusicStream",{C_HPTR,
                                 xSetMusicPan = define_c_proc(ray,"+SetMusicPan",{Music,C_FLOAT}),
                                 xGetMusicTimeLength = define_c_func(ray,"+GetMusicTimeLength",{Music},C_FLOAT),
                                 xGetMusicTimePlayed = define_c_func(ray,"+GetMusicTimePlayed",{Music},C_FLOAT)
-                                
+atom mus=allocate(size_music)                               
 public function LoadMusicStream(sequence fName)
-atom mus=allocate(size_music)
+sequence music=Tmusic
+atom id=make_unique_id(512,1024)
+atom mus=get_addr_music({id,music})
 atom pstr=allocate_string(fName)
 atom ptr
-sequence music
         ptr= c_func(xLoadMusicStream,{mus,pstr})
 music=peek_music(ptr)
 free(pstr)
-free(mus)
-return music
+return append(music,id)
+?music
 end function
 
 public function LoadMusicStreamFromMemory(sequence fileType,atom data,atom size)
@@ -4039,87 +4117,75 @@ public function LoadMusicStreamFromMemory(sequence fileType,atom data,atom size)
 end function
 
 public function IsMusicValid(sequence music)
-atom mus=allocate(size_music)
+atom mus=get_addr_music({music[6],music})
         return and_bits(c_func(xIsMusicValid,{poke_music(mus,music)}),1)
-free(mus)
 end function
 
 public procedure UnloadMusicStream(sequence music)
-atom mus=allocate(size_music)
+atom mus=get_addr_music({music[6],music})
         c_proc(xUnloadMusicStream,{poke_music(mus,music)})
-free(mus)
 end procedure
 
 public procedure PlayMusicStream(sequence music)
-atom mus=allocate(size_music)
+atom mus=get_addr_music({music[6],music})
         c_proc(xPlayMusicStream,{poke_music(mus,music)})
-free(mus)
 end procedure
 
 public function IsMusicStreamPlaying(sequence music)
-atom mus=allocate(size_music)
+atom mus=get_addr_music({music[6],music})
         return c_func(xIsMusicStreamPlaying,{poke_music(mus,music)})
-free(music)
 end function
 
 public procedure UpdateMusicStream(sequence music)
-atom mus=allocate(size_music)
+atom mus=get_addr_music({music[6],music})
         c_proc(xUpdateMusicStream,{poke_music(mus,music)})
-free(mus)
+
 end procedure
 
 public procedure StopMusicStream(sequence music)
-atom mus=allocate(size_music)
+atom mus=get_addr_music({music[6],music})
         c_proc(xStopMusicStream,{poke_music(mus,music)})
-free(mus)
+
 end procedure
 
 public procedure PauseMusicStream(sequence music)
-atom mus=allocate(size_music)
+atom mus=get_addr_music({music[6],music})
         c_proc(xPauseMusicStream,{poke_music(mus,music)})
-free(mus)
 end procedure
 
 public procedure ResumeMusicStream(sequence music)
-atom mus=allocate(size_music)
+atom mus=get_addr_music({music[6],music})
         c_proc(xResumeMusicStream,{poke_music(mus,music)})
-free(mus)
 end procedure
 
 public procedure SeekMusicStream(sequence music,atom pos)
-atom mus=allocate(size_music)
+atom mus=get_addr_music({music[6],music})
         c_proc(xSeekMusicStream,{poke_music(mus,music),pos})
-free(mus)
 end procedure
 
 public procedure SetMusicVolume(sequence music,atom vol)
-atom mus=allocate(size_music)
+atom mus=get_addr_music({music[6],music})
         c_proc(xSetMusicVolume,{poke_music(mus,music),vol})
-free(mus)
 end procedure
 
 public procedure SetMusicPitch(sequence music,atom pit)
-atom mus=allocate(size_music)
+atom mus=get_addr_music({music[6],music})
         c_proc(xSetMusicPitch,{poke_music(mus,music),pit})
-free(mus)
 end procedure
 
 public procedure SetMusicPan(sequence music,atom pan)
-atom mus=allocate(size_music)
+atom mus=get_addr_music({music[6],music})
         c_proc(xSetMusicPan,{poke_music(mus,music),pan})
-free(mus)
 end procedure
 
 public function GetMusicTimeLength(sequence music)
-atom mus=allocate(size_music)
+atom mus=get_addr_music({music[6],music})
         return c_func(xGetMusicTimeLength,{poke_music(mus,music)})
-free(mus)
 end function
 
 public function GetMusicTimePlayed(sequence music)
-atom mus=allocate(size_music)
+atom mus=get_addr_music({music[6],music})
         return c_func(xGetMusicTimePlayed,{poke_music(mus,music)})
-free(mus)
 end function
 
 --Audiostream functions
@@ -4395,47 +4461,7 @@ global enum BORDER_COLOR_NORMAL = 0,
         TEXT_ALIGNMENT
 
 
--- Help for GUI not in Raylib API handling for more Phix/Euphoria Style coding (less Pointer)
-sequence ids={{0,allocate(8)}}
-function get_addr_(atom id_) --get adress of allready existing ID
-atom result
-for i=1 to length(ids) 
-do
-    if (id_ = ids[i][1])
-    then
-        result = ids[i][2]
-        exit
-    else 
-        result = -1
-    end if  
-end for
-return result
-end function
 
-function get_addr(sequence idval) -- Set Value in existing ID memory or create new ID and allocate memory return the adress
-atom addr=get_addr_(idval[1])
-if (addr>0) then
-    poke(addr,atom_to_float32(idval[2]))
-else
-    ids=append(ids,{idval[1],allocate(8)})
-    addr=get_addr_(idval[1])
-    poke(addr,atom_to_float32(idval[2]))  -- for setting a start value
-end if
-return addr
-end function
-
-function get_addr_bool(sequence idval)
-atom addr=get_addr_(idval[1])
-if (addr>0) then
-    poke4(addr,idval[2])
-else
-    ids=append(ids,{idval[1],allocate(8)})
-    addr=get_addr_(idval[1])
-    poke4(addr,idval[2])  -- for setting a start value
-end if
-return addr
-end function
----------------------------------------------------------------------------------------------------------------
 
 constant xGuiEnable = define_c_proc(ray,"+GuiEnable",{}),
          xGuiDisable = define_c_proc(ray,"+GuiDisable",{})
