@@ -44,7 +44,7 @@ Examples using raylib shapes drawing functionality, provided by raylib [shapes](
 | [shapes_mouse_trail](shapes/shapes_mouse_trail.ex) | <img src="shapes/shapes_mouse_trail.png" alt="shapes_mouse_trail" width="80"> | ⭐☆☆☆ | 5.6 | 5.6-dev | [Balamurugan R](https://github.com/Bala050814) |
 | [shapes_starfield_effect](shapes/shapes_starfield_effect.ex) | <img src="shapes/shapes_starfield_effect.png" alt="shapes_starfield_effect" width="80"> | ⭐⭐☆☆ | 5.5 | 5.6-dev | [JP Mortiboys](https://github.com/themushroompirates) |
 | [shapes_ball_physics](shapes/shapes_ball_physics.ex) | <img src="shapes/shapes_ball_physics.png" alt="shapes_ball_physics" width="80"> | ⭐⭐☆☆ | 5.6-dev | 5.6-dev | [David Buzatto](https://github.com/davidbuzatto) |
-
+| [shapes_triangle_strip](shapes/shapes_triangle_strip.ex) | <img src="shapes/shapes_triangle_strip.png" alt="shapes_triangle_strip" width="80"> | ⭐⭐☆☆ | 5.6-dev | 5.6-dev | [Jopestpe](https://github.com/jopestpe) |
 ## category: textures [xx]
 
 Examples using raylib textures functionality, including image/textures loading/generation and drawing, provided by raylib [textures](../src/rtextures.c) module.
@@ -66,7 +66,7 @@ Examples using raylib models functionality, including models loading/generation 
 [models_billboard_rendering](models/models_billboard_rendering.ex) | <img src="models/models_billboard_rendering.png" alt="models_billboard_rendering" width="80"> | ⭐⭐⭐☆ | 1.3 | 3.5 | [Ramon Santamaria](https://github.com/raysan5) |
 | [models_directional_billboard](models/models_directional_billboard.ex) | <img src="models/models_directional_billboard.png" alt="models_directional_billboard" width="80"> | ⭐⭐☆☆ | 5.6-dev | 5.6 | [Robin](https://github.com/RobinsAviary) |
 
-### category: audio [9]
+### category: audio [xx]
 
 Examples using raylib audio functionality, including sound/music loading and playing. This functionality is provided by raylib [raudio](../src/raudio.c) module. Note this module can be used standalone independently of raylib.
 
@@ -74,3 +74,13 @@ Examples using raylib audio functionality, including sound/music loading and pla
 |-----------|--------|:-------------------:|:------------------:|:-----------------------:|:----------------------|
 | [audio_module_playing](audio/audio_module_playing.ex) | <img src="audio/audio_module_playing.png" alt="audio_module_playing" width="80"> | ⭐☆☆☆ | 1.5 | 3.5 | [Ramon Santamaria](https://github.com/raysan5) |
 | [audio_music_stream](audio/audio_music_stream.ex) | <img src="audio/audio_music_stream.png" alt="audio_music_stream" width="80"> | ⭐☆☆☆ | 1.3 | 4.2 | [Ramon Santamaria](https://github.com/raysan5) |
+
+
+### category: shaders [xx]
+
+Examples using raylib shaders functionality, including shaders loading, parameters configuration and drawing using them (model shaders and postprocessing shaders). This functionality is directly provided by raylib [rlgl](../src/rlgl.c) module.
+
+|  example  | image  | difficulty<br>level | version<br>created | last version<br>updated | original<br>developer |
+|-----------|--------|:-------------------:|:------------------:|:-----------------------:|:----------------------|
+| [shaders_shapes_textures](shaders/shaders_shapes_textures.ex) | <img src="shaders/shaders_shapes_textures.png" alt="shaders_shapes_textures" width="80"> | ⭐⭐☆☆ | 1.7 | 3.7 | [Ramon Santamaria](https://github.com/raysan5) |
+

@@ -16,6 +16,7 @@ include std/machine.e
 include std/os.e
 include std/dll.e
 include std/convert.e
+include std/math.e
 constant C_INT64=C_LONGLONG
 --*/
 
@@ -332,6 +333,22 @@ sequence music=Tmusic
 return music
 end function
 
+constant Tshader={0,0}
+constant size_shader=16 
+function poke_shader(atom mem, sequence shader)
+    poke4(mem,shader[1])
+    poke8(mem+8,shader[2])
+    --?shader
+return mem
+end function
+
+function peek_shader(atom mem)
+sequence shader=Tshader
+    shader[1]=peek4u(mem)
+    shader[2]=peek8u(mem+8)
+    --?shader
+return shader
+end function
 
 -- Helper (kind off a primitive state-manager) for GUI not in Raylib API handling for more Phix/Euphoria Style coding (less Pointer)
 sequence ids={{0,allocate(8)}}
@@ -407,6 +424,17 @@ end if
 --return addr
 end function
 
+function get_addr_shader(sequence idval)
+atom addr=get_addr_(idval[1])
+if (addr>0) then
+    return poke_shader(addr,idval[2])
+else
+    ids=append(ids,{idval[1],allocate(size_shader)})
+    addr=get_addr_(idval[1])
+    return poke_shader(addr,idval[2])  -- for setting a start value
+end if
+--return addr
+end function
 ---------------------------------------------------------------------------------------------------------------
 -- end little helper
 --Colors
@@ -1186,7 +1214,9 @@ public procedure EndTextureMode()
 end procedure
 --CHECK
 public procedure BeginShaderMode(sequence shader)
-        c_proc(xBeginShaderMode,{shader})
+--atom mem=allocate(size_shader)
+        c_proc(xBeginShaderMode,{get_addr_shader({shader[3],shader})})
+--free(mem)
 end procedure
 
 public procedure EndShaderMode()
@@ -1230,7 +1260,7 @@ public procedure UnloadVrStereoConfig(sequence config)
 end procedure
 
 --Shader functions
-public constant xLoadShader = define_c_func(ray,"+LoadShader",{C_STRING,C_STRING},Shader),
+public constant xLoadShader = define_c_func(ray,"+LoadShader",{C_HPTR,C_STRING,C_STRING},Shader),
                                 xLoadShaderFromMemory = define_c_func(ray,"+LoadShaderFromMemory",{C_STRING,C_STRING},Shader),
                                 xIsShaderValid = define_c_func(ray,"+IsShaderValid",{Shader},C_BOOL),
                                 xGetShaderLocation = define_c_func(ray,"+GetShaderLocation",{Shader,C_STRING},C_INT),
@@ -1241,8 +1271,34 @@ public constant xLoadShader = define_c_func(ray,"+LoadShader",{C_STRING,C_STRING
                                 xSetShaderValueTexture = define_c_proc(ray,"+SetShaderValueTexture",{Shader,C_INT,Texture2D}),
                                 xUnloadShader = define_c_proc(ray,"+UnloadShader",{Shader})
                                 
-public function LoadShader(sequence vsFileName,sequence fsFileName)
-        return c_func(xLoadShader,{vsFileName,fsFileName})
+public function LoadShader(object  vsFileName,object  fsFileName)
+atom id=allocate(8)
+sequence shader=Tshader
+atom mem=get_addr_shader({id,shader})
+atom ptr
+
+if atom(vsFileName) 
+then
+    vsFileName=0
+else
+    vsFileName=allocate_string(vsFileName)
+end if
+if atom(fsFileName) 
+then
+    fsFileName=0
+else
+    fsFileName=allocate_string(fsFileName)
+end if
+        ptr= c_func(xLoadShader,{mem,vsFileName,fsFileName})
+shader=peek_shader(ptr)
+if vsFileName then
+    free(vsFileName)
+end if
+if fsFileName then
+    free(fsFileName)
+end if
+shader=append(shader,mem)
+return shader
 end function
 
 public function LoadShaderFromMemory(sequence vsCode,sequence fsCode)
@@ -1278,7 +1334,10 @@ public procedure SetShaderValueTexture(sequence shader,atom locIndex,sequence te
 end procedure
 
 public procedure UnloadShader(sequence shader)
-        c_proc(xUnloadShader,{shader})
+atom addr=get_addr_shader({shader[3],shader})
+        c_proc(xUnloadShader,{addr})
+free(shader[3])
+free(addr)
 end procedure
 
 --Screen space functions
@@ -3165,8 +3224,50 @@ public function ColorToHSV(sequence col)
 end function
 
 public function ColorFromHSV(atom hue,atom saturation,atom val)
-        return c_func(xColorFromHSV,{hue,saturation,val})
+        return int_to_bytes(c_func(xColorFromHSV,{hue,saturation,val}))
 end function
+
+global function ColorFromHSV_(atom  hue, atom  saturation, atom value_)
+sequence color = { 0, 0, 0, 255 }
+integer r=1,g=2,b=3
+-- Red channel
+  
+atom k = mod((5.0 + hue/60.0), 6)
+
+    
+atom t = 4.0 - k
+if (t<k) then k=t else k=k end if
+if (k<1) then k=k else k=1 end if
+if (k>0) then k=k else k=0 end if    
+
+color[r] = ((value_ - value_*saturation*k)*255.0)
+  
+-- Green channel
+   
+k = mod((3.0 + hue/60.0), 6)
+    
+t = 4.0 - k 
+if (t<k) then k=t else k=k end if
+if (k<1) then k=k else k=1 end if
+if (k>0) then k=k else k=0 end if  
+    
+color[g] = ((value_ - value_*saturation*k)*255.0)     
+-- Blue channel
+     
+k = mod((1.0 + hue/60.0), 6)
+t = 4.0 - k
+if (t<k) then k=t else k=k end if
+if (k<1) then k=k else k=1 end if
+if (k>0) then k=k else k=0 end if     
+     
+color[b] = ((value_ - value_*saturation*k)*255.0)
+    
+return color
+end function
+
+
+
+
 
 public function ColorTint(sequence col,sequence tint)
         return c_func(xColorTint,{col,tint})
@@ -4101,7 +4202,7 @@ public constant xLoadMusicStream = define_c_func(ray,"+LoadMusicStream",{C_HPTR,
 atom mus=allocate(size_music)                               
 public function LoadMusicStream(sequence fName)
 sequence music=Tmusic
-atom id=make_unique_id(512,1024)
+atom id=allocate(8)
 atom mus=get_addr_music({id,music})
 atom pstr=allocate_string(fName)
 atom ptr
@@ -4109,7 +4210,7 @@ atom ptr
 music=peek_music(ptr)
 free(pstr)
 return append(music,id)
-?music
+--?music
 end function
 
 public function LoadMusicStreamFromMemory(sequence fileType,atom data,atom size)
@@ -4124,6 +4225,8 @@ end function
 public procedure UnloadMusicStream(sequence music)
 atom mus=get_addr_music({music[6],music})
         c_proc(xUnloadMusicStream,{poke_music(mus,music)})
+free(mus)
+free(music[6])
 end procedure
 
 public procedure PlayMusicStream(sequence music)
