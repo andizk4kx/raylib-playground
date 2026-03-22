@@ -17,6 +17,7 @@ include std/os.e
 include std/dll.e
 include std/convert.e
 include std/math.e
+include std/search.e
 constant C_INT64=C_LONGLONG
 --*/
 
@@ -348,6 +349,30 @@ sequence shader=Tshader
     shader[2]=peek8u(mem+8)
     --?shader
 return shader
+end function
+
+constant Tfont={0,0,0,Ttexture,0,0}
+constant size_font=64
+function peek_font(atom mem)
+sequence font=Tfont
+        font[1]=peek4s(mem)
+        font[2]=peek4s(mem+4)
+        font[3]=peek4s(mem+8)
+        font[4]=peek_texture(mem+12)
+        font[5]=peek8u(mem+32) --44? 48? 52?
+        font[6]=peek8u(mem+40)
+return font
+end function
+
+function poke_font(atom mem,sequence font)
+atom dummy
+        poke4(mem,font[1])
+        poke4(mem+4,font[2])
+        poke4(mem+8,font[3])
+dummy=  poke_texture(mem+12,font[4])
+        poke8(mem+32,font[5])
+        poke8(mem+40,font[6])
+return mem
 end function
 
 -- Helper (kind off a primitive state-manager) for GUI not in Raylib API handling for more Phix/Euphoria Style coding (less Pointer)
@@ -3310,9 +3335,9 @@ public function GetPixelDataSize(atom width,atom height,atom format)
 end function
 
 --Font loading functions
-public constant xGetFontDefault = define_c_func(ray,"+GetFontDefault",{},Font),
-                                xLoadFont = define_c_func(ray,"+LoadFont",{C_STRING},Font),
-                                xLoadFontEx = define_c_func(ray,"+LoadFontEx",{C_STRING,C_INT,C_POINTER,C_INT},Font),
+public constant xGetFontDefault = define_c_func(ray,"+GetFontDefault",{C_HPTR},Font),
+                                xLoadFont = define_c_func(ray,"+LoadFont",{C_HPTR,C_STRING},Font),
+                                xLoadFontEx = define_c_func(ray,"+LoadFontEx",{C_HPTR,C_STRING,C_INT,C_POINTER,C_INT},Font),
                                 xLoadFontFromImage = define_c_func(ray,"+LoadFontFromImage",{Image,C_Color,C_INT},Font),
                                 xLoadFontFromMemory = define_c_func(ray,"+LoadFontFromMemory",{C_STRING,C_POINTER,C_INT,C_INT,C_POINTER,C_INT},Font),
                                 xIsFontValid = define_c_func(ray,"+IsFontValid",{Font},C_BOOL),
@@ -3323,15 +3348,37 @@ public constant xGetFontDefault = define_c_func(ray,"+GetFontDefault",{},Font),
                                 xExportFontAsCode = define_c_func(ray,"+ExportFontAsCode",{Font,C_STRING},C_BOOL)
                                 
 public function GetFontDefault()
-        return c_func(xGetFontDefault,{})
+atom mem=allocate(size_font)
+atom ptr
+sequence font=Tfont
+        ptr = c_func(xGetFontDefault,{})
+font=peek_font(ptr)
+free(mem)
+return font
 end function
 
 public function LoadFont(sequence fName)
-        return c_func(xLoadFont,{fName})
+atom mem=allocate(size_font)
+atom pstr=allocate_string(fName)
+atom ptr
+sequence font=Tfont
+        ptr= c_func(xLoadFont,{mem,pstr})
+font=peek_font(ptr)
+free(mem)
+free(pstr)
+return font
 end function
 
 public function LoadFontEx(sequence fName,atom size,atom points,atom count)
-        return c_func(xLoadFontEx,{fName,size,points,count})
+atom mem=allocate(size_font)
+atom pstr=allocate_string(fName)
+atom ptr
+sequence font=Tfont
+        ptr = c_func(xLoadFontEx,{mem,pstr,size,points,count})
+font=peek_font(ptr)
+free(mem)
+free(pstr)
+return font
 end function
 
 public function LoadFontFromImage(sequence image,sequence key,atom firstchar)
@@ -3359,7 +3406,9 @@ public procedure UnloadFontData(atom glyphs,atom count)
 end procedure
 
 public procedure UnloadFont(sequence font)
-        c_proc(xUnloadFont,{font})
+atom mem=allocate(size_font)
+        c_proc(xUnloadFont,{poke_font(mem,font)})
+free(mem)
 end procedure
 
 public function ExportFontAsCode(sequence font,sequence fName)
@@ -3384,12 +3433,20 @@ atom pstr =allocate_string(text)
 free(pstr)
 end procedure
 
-public procedure DrawTextEx(atom font,sequence text,sequence pos,atom fontSize,atom space,sequence tint)
-        c_proc(xDrawTextEx,{font,text,pos,fontSize,space,tint})
+public procedure DrawTextEx(sequence font,sequence text,sequence pos,atom fontSize,atom space,sequence tint)
+atom pstr =allocate_string(text)
+atom mem=allocate(size_font)
+        c_proc(xDrawTextEx,{poke_font(mem,font),pstr,V2toReg(pos),fontSize,space,bytes_to_int(tint)})
+free(mem)
+free(pstr)
 end procedure
 
-public procedure DrawTextPro(atom font,sequence text,sequence pos,sequence origin,atom rotation,atom fontSize,atom space,sequence tint)
-        c_proc(xDrawTextPro,{font,text,pos,origin,rotation,fontSize,space,tint})
+public procedure DrawTextPro(sequence  font,sequence text,sequence pos,sequence origin,atom rotation,atom fontSize,atom space,sequence tint)
+atom pstr =allocate_string(text)
+atom mem=allocate(size_font)
+        c_proc(xDrawTextPro,{poke_font(mem,font),pstr,V2toReg(pos),V2toReg(origin),rotation,fontSize,space,bytes_to_int(tint)})
+free(mem)
+free(pstr)
 end procedure
 
 public procedure DrawTextCodepoint(atom font,atom codepoint,sequence pos,atom fontSize,sequence tint)
@@ -3419,7 +3476,13 @@ free(pstr)
 end function
 
 public function MeasureTextEx(sequence font,sequence text,atom size,atom space)
-        return c_func(xMeasureTextEx,{font,text,size,space})
+atom pstr =allocate_string(text)
+atom mem=allocate(size_font)
+
+         return RegtoV2(c_func(xMeasureTextEx,{poke_font(mem,font),pstr,size,space}))
+free(pstr)
+free(mem)
+
 end function
 
 public function GetGlyphIndex(sequence font,atom cpoint)
@@ -3503,24 +3566,29 @@ public function TextCopy(object dst,sequence src)
         return c_func(xTextCopy,{dst,src})
 end function
 
-public function TextIsEqual(sequence text,sequence text2)
+public function TextIsEqual(sequence text,sequence text2)   
+        return equal(text,text2)
         return c_func(xTextIsEqual,{text,text2})
 end function
 
 public function TextLength(sequence text)
-        return c_func(xTextLength,{text})
+    return(length(text))
+    --  return c_func(xTextLength,{text})
 end function
 
 public function TextFormat(sequence text,object x)
-        return c_func(xTextFormat,{text,x})
+text=match_replace("%i",text,"%d")
+        --return c_func(xTextFormat,{text,x})
+        return sprintf(text,x)
 end function
 
 public function TextSubtext(sequence text,atom pos,atom len)
-        return c_func(xTextSubtext,{text,pos,len})
+        return text[pos..pos+len]
+    --  return c_func(xTextSubtext,{text,pos,len})
 end function
 
-public function TextReplace(sequence text,sequence replace,sequence _by)
-        return c_func(xTextReplace,{text,replace,_by})
+public function TextReplace(sequence text,sequence replace_,sequence _by)
+        return c_func(xTextReplace,{text,replace_,_by})
 end function
 
 public function TextInsert(sequence text,sequence insert,atom pos)
@@ -3564,7 +3632,7 @@ public function TextToCamel(sequence text)
 end function
 
 public constant xTextToInteger = define_c_func(ray,"+TextToInteger",{C_STRING},C_INT),
-                                xTextToFloat = define_c_func(ray,"+TextToFloat",{C_STRING},C_FLOAT)
+                xTextToFloat = define_c_func(ray,"+TextToFloat",{C_STRING},C_FLOAT)
                                 
 public function TextToInteger(sequence text)
         return c_func(xTextToInteger,{text})
