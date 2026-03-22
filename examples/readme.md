@@ -56,6 +56,8 @@ Examples using raylib textures functionality, including image/textures loading/g
 | [textures_background_scrolling](textures/textures_background_scrolling.ex) | <img src="textures/textures_background_scrolling.png" alt="textures_background_scrolling" width="80"> | ⭐☆☆☆ | 2.0 | 2.5 | [Ramon Santamaria](https://github.com/raysan5) |
 | [textures_bunnymark](textures/textures_bunnymark.ex) | <img src="textures/textures_bunnymark.png" alt="textures_bunnymark" width="80"> | ⭐⭐⭐☆ | 1.6 | 2.5 | [Ramon Santamaria](https://github.com/raysan5) |
 | [textures_gif_player](textures/textures_gif_player.ex) | <img src="textures/textures_gif_player.png" alt="textures_gif_player" width="80"> | ⭐⭐⭐☆ | 4.2 | 4.2 | [Ramon Santamaria](https://github.com/raysan5) |
+| [textures_sprite_animation](textures/textures_sprite_animation.ex) | <img src="textures/textures_sprite_animation.png" alt="textures_sprite_animation" width="80"> | ⭐⭐☆☆ | 1.3 | 1.3 | [Ramon Santamaria](https://github.com/raysan5) |
+
 
 ### category: models [xx]
 
