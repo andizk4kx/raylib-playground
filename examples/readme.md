@@ -90,5 +90,5 @@ Examples using raylib text functionality, including sprite fonts loading/generat
 
 |  example  | image  | difficulty<br>level | version<br>created | last version<br>updated | original<br>developer |
 |-----------|--------|:-------------------:|:------------------:|:-----------------------:|:----------------------|
-| [text_sprite_fonts](text/text_sprite_fonts.ex) | <img src="text/text_sprite_fonts.png" alt="text_sprite_fonts" width="80"> | ⭐☆☆☆ | 1.7 | 3.7 | [Ramon Santamaria](https://github.com/raysan5) |
+| [text_font_spritefonts](text/text_font_spritefonts.ex) | <img src="text/text_font_spritefonts.png" alt="text_sprite_fonts" width="80"> | ⭐☆☆☆ | 1.7 | 3.7 | [Ramon Santamaria](https://github.com/raysan5) |
 | [text_font_loading](text/text_font_loading.ex) | <img src="text/text_font_loading.png" alt="text_font_loading" width="80"> | ⭐☆☆☆ | 1.4 | 3.0 | [Ramon Santamaria](https://github.com/raysan5) |
