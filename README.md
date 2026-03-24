@@ -1,4 +1,4 @@
-A playground for my experiments with Raylib (for Phix and Euphoria)
+A playground for my experiments with Raylib (for [Phix](https://github.com/petelomax/Phix) and [Euphoria](https://github.com/OpenEuphoria/euphoria))
 
 
 
