@@ -2,7 +2,7 @@ All examples ported so far.
 All examples have been tested with Euphoria 4.1 64-bit and Phix 1.0.6 64-bit, although Phix for Windows is the intended target. Using the wrapper (binding) raylib64.e available here.
 32-bit and Linux are not supported.
 
-If you need 32-bit support, you can use the more comprehensive wrapper by Icy_Viking for Euphoria 4.1 (https://github.com/gAndy50/libffi-euphoria). Some examples work directly with this wrapper, while others need to be adapted. This wrapper supports Linux/Windows 32/64-bit.
+If you need 32-bit support, you can use the more comprehensive wrapper by Icy_Viking for Euphoria 4.1 (https://github.com/gAndy50/EuRayLib5). Some examples work directly with this wrapper, while others need to be adapted. This wrapper supports Linux/Windows 32/64-bit.
 
 
 ### category: core [xx]
