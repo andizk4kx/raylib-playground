@@ -18,6 +18,7 @@ include std/dll.e
 include std/convert.e
 include std/math.e
 include std/search.e
+include std/text.e
 constant C_INT64=C_LONGLONG
 --*/
 
@@ -248,7 +249,7 @@ return addr
 end function
 
 global constant Tcamera3D={{0,0,0},{0,0,0},{0,0,0},0,0}
-constant size_camera3d=48 -- padded to 64bit 8-bytes
+constant size_camera3d=64 -- padded to 64bit 8-bytes
 function poke_camera3d(atom mem, sequence camera3D)
     poke(mem,atom_to_float32(camera3D[1][1]))
     poke(mem+4,atom_to_float32(camera3D[1][2]))
@@ -262,9 +263,9 @@ function poke_camera3d(atom mem, sequence camera3D)
     poke(mem+28,atom_to_float32(camera3D[3][2]))
     poke(mem+32,atom_to_float32(camera3D[3][3]))
 
-    poke(mem+36,atom_to_float32(camera3D[4]))
-    poke(mem+40,atom_to_float32(camera3D[5]))
-    poke4(mem+44,0) --padding
+    poke(mem+36,atom_to_float32(camera3D[4])) --war 36
+    poke4(mem+40,camera3D[5])
+    --poke4(mem+44,0) --padding
 return mem
 end function
 
@@ -286,7 +287,7 @@ sequence camera3D=Tcamera3D
 
 
     camera3D[4]=float32_to_atom(peek({mem+36,4}))
-    camera3D[5]=float32_to_atom(peek({mem+40,4}))
+    camera3D[5]=(peek4s(mem+40))
 return camera3D
 end function
 
@@ -2014,9 +2015,58 @@ free(camera)
 return camret
 end function
 
-public procedure UpdateCameraPro(atom cam,sequence movement,sequence rotation,atom zoom)
-        c_proc(xUpdateCameraPro,{cam,movement,rotation,zoom})
-end procedure
+public function UpdateCameraPro(sequence  cam,sequence movement,sequence rotation,atom zoom)
+atom camera=allocate(size_camera3d)
+sequence camret=Tcamera3D
+atom vec1=allocate(size_vector3)
+atom vec2=allocate(size_vector3)
+        c_proc(xUpdateCameraPro,{poke_camera3d(camera,cam),poke_vector3(vec1,movement),poke_vector3(vec2,rotation),zoom})
+camret=peek_camera3d(camera)
+free(camera)
+free(vec1)
+free(vec2)
+return camret
+end function
+
+--RLAPI Vector3 GetCameraForward(Camera *camera);
+--RLAPI Vector3 GetCameraUp(Camera *camera);
+--RLAPI Vector3 GetCameraRight(Camera *camera);
+
+-- Camera movement
+--RLAPI void CameraMoveForward(Camera *camera, float distance, bool moveInWorldPlane);
+--RLAPI void CameraMoveUp(Camera *camera, float distance);
+--RLAPI void CameraMoveRight(Camera *camera, float distance, bool moveInWorldPlane);
+--RLAPI void CameraMoveToTarget(Camera *camera, float delta);
+-- Camera ratation
+
+--RLAPI void CameraYaw(Camera *camera, float angle, bool rotateAroundTarget);
+--RLAPI void CameraPitch(Camera *camera, float angle, bool lockView, bool rotateAroundTarget, bool rotateUp);
+--RLAPI void CameraRoll(Camera *camera, float angle);
+
+--RLAPI Matrix GetCameraViewMatrix(Camera *camera);
+--RLAPI Matrix GetCameraProjectionMatrix(Camera *camera, float aspect);
+constant xCameraYaw = define_c_proc(ray,"CameraYaw",{C_POINTER,C_FLOAT,C_BOOL}),
+         xCameraPitch = define_c_proc(ray,"CameraPitch",{C_POINTER,C_FLOAT,C_BOOL,C_BOOL,C_BOOL}),
+         xCameraRoll = define_c_proc(ray,"CameraRoll",{C_POINTER,C_FLOAT})
+
+public function CameraYaw(sequence cam,atom angle,atom rotate)
+atom camera=allocate(size_camera3d)
+sequence camret=Tcamera3D       
+            c_proc(xCameraYaw,{poke_camera3d(camera,cam),angle,rotate})
+camret=peek_camera3d(camera)
+free(camera)
+return camret        
+end function
+
+public function CameraPitch(sequence cam,atom angle,atom lock,atom rotate,atom rotateup)
+atom camera=allocate(size_camera3d)
+sequence camret=Tcamera3D
+            c_proc(xCameraPitch,{poke_camera3d(camera,cam),angle,lock,rotate,rotateup})
+camret=peek_camera3d(camera)
+free(camera)
+return camret
+end function
+
 
 --Shape functions
 public constant xSetShapesTexture = define_c_proc(ray,"+SetShapesTexture",{Texture2D,Rectangle}),
@@ -2397,7 +2447,7 @@ free(mem)
 end function
 
 public function CheckCollisionCircleLine(sequence center,atom rad,sequence p1,sequence p2)
-        return c_func(xCheckCollisionCircleLine,{center,rad,p1,p2})
+        return c_func(xCheckCollisionCircleLine,{V2toReg(center),rad,V2toReg(p1),V2toReg(p2)})
 end function
 
 public function CheckCollisionPointRec(sequence point,sequence rec)
@@ -2417,19 +2467,19 @@ public function CheckCollisionPointCircle(sequence point,sequence center,atom ra
 end function
 
 public function CheckCollisionPointTriangle(sequence point,sequence p1,sequence p2,sequence p3)
-        return c_func(xCheckCollisionPointTriangle,{point,p1,p2,p3})
+        return c_func(xCheckCollisionPointTriangle,{V2toReg(point),V2toReg(p1),V2toReg(p2),V2toReg(p3)})
 end function
 
 public function CheckCollisionPointLine(sequence point,sequence p1,sequence p2,atom threshold)
-        return c_func(xCheckCollisionPointLine,{point,p1,p2,threshold})
+        return c_func(xCheckCollisionPointLine,{V2toReg(point),V2toReg(p1),V2toReg(p2),threshold})
 end function
 
 public function CheckCollisionPointPoly(sequence point,atom points,atom count)
-        return c_func(xCheckCollisionPointPoly,{point,points,count})
+        return c_func(xCheckCollisionPointPoly,{V2toReg(point),points,count})
 end function
 
 public function CheckCollisionLines(sequence start,sequence endpos,sequence start2,sequence pos2,atom cpoint)
-        return c_func(xCheckCollisionLines,{start,endpos,start2,pos2,cpoint})
+        return c_func(xCheckCollisionLines,{V2toReg(start),V2toReg(endpos),V2toReg(start2),V2toReg(pos2),cpoint})
 end function
 
 public function GetCollisionRec(sequence rec,sequence rec2)
@@ -3241,7 +3291,7 @@ public function ColorNormalize(sequence col)
 end function
 
 public function ColorFromNormalized(sequence norm)
-        return c_func(xColorFromNormalized,{norm})
+        return int_to_bytes(c_func(xColorFromNormalized,{norm}))
 end function
 
 public function ColorToHSV(sequence col)
@@ -3295,23 +3345,23 @@ end function
 
 
 public function ColorTint(sequence col,sequence tint)
-        return c_func(xColorTint,{col,tint})
+        return int_to_bytes(c_func(xColorTint,{col,tint}))
 end function
 
 public function ColorBrightness(sequence col,atom factor)
-        return c_func(xColorBrightness,{col,factor})
+        return int_to_bytes(c_func(xColorBrightness,{col,factor}))
 end function
 
 public function ColorContrast(sequence col,atom contrast)
-        return c_func(xColorContrast,{col,contrast})
+        return int_to_bytes(c_func(xColorContrast,{col,contrast}))
 end function
 
 public function ColorAlpha(sequence col,atom alpha)
-        return c_func(xColorAlpha,{col,alpha})
+        return int_to_bytes(c_func(xColorAlpha,{col,alpha}))
 end function
 
 public function ColorAlphaBlend(sequence dst,sequence src,sequence tint)
-        return c_func(xColorAlphaBlend,{dst,src,tint})
+        return int_to_bytes(c_func(xColorAlphaBlend,{dst,src,tint}))
 end function
 
 public function ColorLerp(sequence col,sequence col2,atom factor)
@@ -3323,7 +3373,7 @@ public function GetColor(atom hex)
 end function
 
 public function GetPixelColor(atom ptr,atom format)
-        return c_func(xGetPixelColor,{ptr,format})
+        return int_to_bytes(c_func(xGetPixelColor,{ptr,format}))
 end function
 
 public procedure SetPixelColor(atom ptr,sequence col,atom format)
@@ -3612,11 +3662,13 @@ public function TextFindIndex(sequence text,sequence _find)
 end function
 
 public function TextToUpper(sequence text)
-        return c_func(xTextToUpper,{text})
+        return upper(text)
+--      return c_func(xTextToUpper,{text})
 end function
 
 public function TextToLower(sequence text)
-        return c_func(xTextToLower,{text})
+        return lower(text)
+--      return c_func(xTextToLower,{text})
 end function
 
 public function TextToPascal(sequence text)
@@ -3748,7 +3800,9 @@ public procedure DrawCapsuleWires(sequence start,sequence ep,atom rad,atom slice
 end procedure
 
 public procedure DrawPlane(sequence pos,sequence size,sequence col)
-        c_proc(xDrawPlane,{pos,size,col})
+atom mem=allocate(size_vector3)
+        c_proc(xDrawPlane,{poke_vector3(mem,pos),V2toReg(size),bytes_to_int(col)})
+free(mem)
 end procedure
 
 public procedure DrawRay(sequence ray,sequence col)
