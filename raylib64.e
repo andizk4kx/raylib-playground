@@ -147,6 +147,14 @@ function poke_vector3(atom addr,sequence vector3)
     return addr
 end function
 
+function peek_vector3(atom memC)
+sequence result={0,0,0}
+    result[1]=float32_to_atom(peek({memC,4}))
+    result[2]=float32_to_atom(peek({memC+4,4}))
+    result[3]=float32_to_atom(peek({memC+8,4}))
+return result
+end function
+
 constant size_vector4=16
 function poke_vector4(atom addr,sequence vector4)
     poke(addr,atom_to_float32(vector4[1]))
@@ -3747,7 +3755,11 @@ free(mem)
 end procedure
 
 public procedure DrawCubeV(sequence pos,sequence size,sequence col)
-        c_proc(xDrawCubeV,{pos,size,col})
+atom v1=allocate(size_vector3)
+atom v2=allocate(size_vector3)
+        c_proc(xDrawCubeV,{poke_vector3(v1,pos),poke_vector3(v2,size),bytes_to_int(col)})
+free(v1)
+free(v2)
 end procedure
 
 public procedure DrawCubeWires(sequence pos,atom width,atom height,atom len,sequence col)
@@ -3760,11 +3772,17 @@ free(mem)
 end procedure
 
 public procedure DrawCubeWiresV(sequence pos,sequence size,sequence col)
-        c_proc(xDrawCubeWiresV,{pos,size,col})
+atom v1=allocate(size_vector3)
+atom v2=allocate(size_vector3)
+        c_proc(xDrawCubeWiresV,{poke_vector3(v1,pos),poke_vector3(v2,size),bytes_to_int(col)})
+free(v1)
+free(v2)
 end procedure
 
 public procedure DrawSphere(sequence pos,atom rad,sequence col)
-        c_proc(xDrawSphere,{pos,rad,col})
+atom v1=allocate(size_vector3)
+        c_proc(xDrawSphere,{poke_vector3(v1,pos),rad,bytes_to_int(col)})
+free(v1)
 end procedure
 
 public procedure DrawSphereEx(sequence pos,atom rad,atom rings,atom slices,sequence col)
@@ -3799,7 +3817,7 @@ public procedure DrawCapsuleWires(sequence start,sequence ep,atom rad,atom slice
         c_proc(xDrawCapsuleWires,{start,ep,rad,slices,rings,col})
 end procedure
 
-public procedure DrawPlane(sequence pos,sequence size,sequence col)
+public procedure DrawPlane(sequence pos,sequence size,sequence  col)
 atom mem=allocate(size_vector3)
         c_proc(xDrawPlane,{poke_vector3(mem,pos),V2toReg(size),bytes_to_int(col)})
 free(mem)
@@ -4517,6 +4535,12 @@ end procedure
 --# raymath functions   appended as needed                                                              #
 --#                                                                                                     #
 --#########################################################################################################
+constant xVector2Normalize = define_c_func(ray,"+Vector2Normalize",{Vector2},Vector2)
+
+global function Vector2Normalize(sequence v)
+        return RegtoV2(c_func(xVector2Normalize,{V2toReg(v)}))
+end function
+
 constant xVector2Angle = define_c_func(ray,"+Vector2Angle",{Vector2,Vector2},C_FLOAT)
 
 global function Vector2Angle(sequence v,sequence v2)
@@ -4542,7 +4566,22 @@ end function
 --integer x=1,y=2
 --  return { v[x]*scale, v[y]*scale }
 --end function
-export constant xVector3Distance = define_c_func(ray,"+Vector3Distance",{Vector3,Vector3},C_FLOAT)
+
+constant xVector2Length = define_c_func(ray,"+Vector2Length",{Vector2},C_FLOAT)
+
+global function Vector2Length(sequence v)
+        return c_func(xVector2Length,{V2toReg(v)})
+end function
+
+constant xVector3Length = define_c_func(ray,"+Vector3Length",{Vector3},C_FLOAT)
+
+global function Vector3Length(sequence v)
+atom vec1=allocate(size_vector3)
+        return c_func(xVector3Length,{poke_vector3(vec1,v)})
+free(vec1)
+end function
+
+constant xVector3Distance = define_c_func(ray,"+Vector3Distance",{Vector3,Vector3},C_FLOAT)
 
 global function Vector3Distance(sequence v,sequence v2)
 atom vec1=allocate(size_vector3)
@@ -4551,6 +4590,140 @@ atom vec2=allocate(size_vector3)
 free(vec1)
 free(vec2)
 end function
+
+constant xVector3Scale = define_c_func(ray,"+Vector3Scale",{C_HPTR,Vector3,C_FLOAT},Vector3)
+
+global function Vector3Scale(sequence v,atom scalar)
+atom vec1=allocate(size_vector3)
+atom mem=allocate(size_vector3)
+sequence result={0,0,0}
+atom ptr
+        ptr = c_func(xVector3Scale,{mem,poke_vector3(vec1,v),scalar})
+result=peek_vector3(ptr)
+free(vec1)
+free(mem)
+return result
+end function
+
+constant xVector3Angle = define_c_func(ray,"+Vector3Angle",{Vector3,Vector3},C_FLOAT)
+
+global function Vector3Angle(sequence v,sequence v2)
+atom vec1=allocate(size_vector3)
+atom vec2=allocate(size_vector3)
+atom result
+        result = c_func(xVector3Angle,{poke_vector3(vec1,v),poke_vector3(vec2,v2)})
+
+free(vec1)
+free(vec2)
+return result
+end function
+
+
+
+constant xVector3Normalize = define_c_func(ray,"+Vector3Normalize",{C_HPTR,Vector3},Vector3)
+
+global function Vector3Normalize(sequence v)
+atom vec1=allocate(size_vector3)
+atom mem=allocate(size_vector3)
+sequence result={0,0,0}
+atom ptr
+        ptr = c_func(xVector3Normalize,{mem,poke_vector3(vec1,v)})
+result=peek_vector3(ptr)
+free(vec1)
+free(mem)
+return result
+end function
+
+constant xVector3Negate = define_c_func(ray,"+Vector3Negate",{C_HPTR,Vector3},Vector3)
+
+global function Vector3Negate(sequence v)
+atom vec1=allocate(size_vector3)
+atom mem=allocate(size_vector3)
+sequence result={0,0,0}
+atom ptr
+        ptr = c_func(xVector3Negate,{mem,poke_vector3(vec1,v)})
+result=peek_vector3(ptr)
+free(vec1)
+free(mem)
+return result
+end function
+
+
+constant xVector3DotProduct = define_c_func(ray,"+Vector3DotProduct",{Vector3,Vector3},C_FLOAT)
+
+global function Vector3DotProduct(sequence v,sequence v2)
+atom vec1=allocate(size_vector3)
+atom vec2=allocate(size_vector3)
+        return c_func(xVector3DotProduct,{poke_vector3(vec1,v),poke_vector3(vec2,v2)})
+free(vec1)
+free(vec2)
+end function
+
+constant xVector3RotateByAxisAngle = define_c_func(ray,"+Vector3RotateByAxisAngle",{C_HPTR,Vector3,Vector3,C_FLOAT},Vector3)
+
+global function Vector3RotateByAxisAngle(sequence v,sequence v1,atom ang)
+atom vec1=allocate(size_vector3)
+atom vec2=allocate(size_vector3)
+atom mem=allocate(size_vector3)
+sequence result={0,0,0}
+atom ptr
+        ptr= c_func(xVector3RotateByAxisAngle,{mem,poke_vector3(vec1,v),poke_vector3(vec2,v1),ang})
+result=peek_vector3(ptr)
+free(vec1)
+free(vec2)
+free(mem)
+return result
+end function
+
+constant xVector3Lerp = define_c_func(ray,"+Vector3Lerp",{C_HPTR,Vector3,Vector3,C_FLOAT},Vector3)
+
+global function Vector3Lerp(sequence v,sequence v2,atom amt)
+atom vec1=allocate(size_vector3)
+atom vec2=allocate(size_vector3)
+atom mem=allocate(size_vector3)
+sequence result={0,0,0}
+atom ptr
+        ptr = c_func(xVector3Lerp,{mem,poke_vector3(vec1,v),poke_vector3(vec2,v2),amt})
+result=peek_vector3(ptr)
+free(vec1)
+free(vec2)
+free(mem)
+return result
+end function
+
+constant xVector3Add = define_c_func(ray,"+Vector3Add",{C_HPTR,Vector3,Vector3},Vector3)
+
+global function Vector3Add(sequence v,sequence v2)
+atom vec1=allocate(size_vector3)
+atom vec2=allocate(size_vector3)
+atom mem=allocate(size_vector3)
+sequence result={0,0,0}
+atom ptr
+        ptr = c_func(xVector3Add,{mem,poke_vector3(vec1,v),poke_vector3(vec2,v2)})
+result=peek_vector3(ptr)
+free(vec1)
+free(vec2)
+free(mem)
+return result
+end function
+
+constant xVector3CrossProduct = define_c_func(ray,"+Vector3CrossProduct",{C_HPTR,Vector3,Vector3},Vector3)
+
+global function Vector3CrossProduct(sequence v,sequence v2)
+atom vec1=allocate(size_vector3)
+atom vec2=allocate(size_vector3)
+atom mem=allocate(size_vector3)
+sequence result={0,0,0}
+atom ptr
+        ptr = c_func(xVector3CrossProduct,{mem,poke_vector3(vec1,v),poke_vector3(vec2,v2)})
+result=peek_vector3(ptr)
+free(vec1)
+free(vec2)
+free(mem)
+return result
+end function
+
+
 
 export constant xClamp = define_c_func(ray,"+Clamp",{C_FLOAT,C_FLOAT,C_FLOAT},C_FLOAT)
 
