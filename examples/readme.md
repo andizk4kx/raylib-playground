@@ -2,7 +2,7 @@ All examples ported so far.
 All examples have been tested with Euphoria 4.1 64-bit and Phix 1.0.6 64-bit, although Phix for Windows is the intended target. Using the wrapper (binding) raylib64.e available here.
 32-bit and Linux are not supported.
 
-If you need 32-bit support, you can use the more comprehensive wrapper by Icy_Viking for Euphoria 4.1 (https://github.com/gAndy50/EuRayLib5). Some examples work directly with this wrapper, while others need to be adapted. This wrapper supports Linux/Windows 32/64-bit.
+If you need 32-bit support, you can use the more comprehensive wrapper by Icy_Viking for Euphoria 4.1 (https://github.com/gAndy50/libffi-euphoria). Some examples work directly with this wrapper, while others need to be adapted. This wrapper supports Linux/Windows 32/64-bit.
 
 
 ### category: core [xx]
@@ -26,6 +26,7 @@ Examples using raylib [core](../src/rcore.c) module platform functionality: wind
 | [core_3d_camera_mode](core/core_3d_camera_mode.ex) | <img src="core/core_3d_camera_mode.png" alt="core_3d_camera_mode" width="80"> | ⭐☆☆☆ | 1.0 | 1.0 | [Ramon Santamaria](https://github.com/raysan5) |
 | [core_3d_camera_free](core/core_3d_camera_free.ex) | <img src="core/core_3d_camera_free.png" alt="core_3d_camera_free" width="80"> | ⭐☆☆☆ | 1.3 | 1.3 | [Ramon Santamaria](https://github.com/raysan5) |
 | [core_3d_camera_first_person](core/core_3d_camera_first_person.ex) | <img src="core/core_3d_camera_first_person.png" alt="core_3d_camera_first_person" width="80"> | ⭐⭐☆☆ | 1.3 | 1.3 | [Ramon Santamaria](https://github.com/raysan5) |
+| [core_3d_camera_fps](core/core_3d_camera_fps.ex) | <img src="core/core_3d_camera_fps.png" alt="core_3d_camera_fps" width="80"> | ⭐⭐⭐☆ | 5.5 | 5.5 | [Agnis Aldiņš](https://github.com/nezvers) |
 | [core_window_flags](core/core_window_flags.ex) | <img src="core/core_window_flags.png" alt="core_window_flags" width="80"> | ⭐⭐⭐☆ | 3.5 | 3.5 | [Ramon Santamaria](https://github.com/raysan5) |
 | [core_render_texture](core/core_render_texture.ex) | <img src="core/core_render_texture.png" alt="core_render_texture" width="80"> | ⭐☆☆☆ | 5.6-dev | 5.6-dev | [Ramon Santamaria](https://github.com/raysan5) |
 
