@@ -15,7 +15,7 @@
 *   Copyright (c) 2025 Agnis Aldins (@nezvers)
 *
 ********************************************************************************************/
-
+--adapted to Euphoria/Phix 2026 Andreas Wagner
 include "../../raylib64.e"
 --/*
 include std/math.e
@@ -102,7 +102,7 @@ sequence lean = { 0,0 }
 
     DisableCursor()         -- Limit cursor to relative movement inside the window
 
-    --SetTargetFPS(60)      -- Set our game to run at 60 frames-per-second
+    SetTargetFPS(60)        -- Set our game to run at 60 frames-per-second
     ----------------------------------------------------------------------------------------
 
     -- Main game loop
