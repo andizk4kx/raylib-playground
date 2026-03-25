@@ -299,7 +299,7 @@ sequence camera3D=Tcamera3D
 return camera3D
 end function
 
-constant size_audiostream=32 --MUST be padded for Music
+global constant size_audiostream=32 --MUST be padded for Music
 function poke_stream(atom mem,sequence stream)
     poke8(mem,stream[1])
     poke8(mem+8,stream[2])
@@ -320,6 +320,7 @@ sequence stream={0,0,0,0,0}
 return stream
 end function
 
+
 constant size_music=64
 function poke_music(atom mem,sequence music)
 atom dummy
@@ -331,7 +332,7 @@ dummy=poke_stream(mem,music[1])
 return mem
 end function
 
-constant Tmusic = {{0,0,0,0,0},0,0,0,0}
+global constant Tmusic = {{0,0,0,0,0},0,0,0,0}
 function peek_music(atom mem)
 sequence music=Tmusic
     music[1]=peek_stream(mem)
@@ -339,9 +340,25 @@ sequence music=Tmusic
     music[3]=peek(mem+36) -- bool looping
     music[4]=peek4s(mem+40)
     music[5]=peek8s(mem+44)
-
 return music
 end function
+
+global constant Tsound={{0,0,0,0,0},0}
+constant size_sound =40
+function poke_sound(atom mem,sequence sound_)
+atom dummy
+dummy=poke_stream(mem,sound_[1])
+      poke4(mem+32,sound_[2]) --framecount
+return mem
+end function
+
+function peek_sound(atom mem)
+sequence sound_=Tsound
+    sound_[1]=peek_stream(mem)
+    sound_[2]=peek4u(mem+32) --framecount
+return sound_
+end function
+
 
 constant Tshader={0,0}
 constant size_shader=16 
@@ -422,7 +439,7 @@ function make_unique_id(integer from_id, integer to_id)
 end function
 
 
-function get_addr(sequence idval) -- Set Value in existing ID memory or create new ID and allocate memory return the adress
+global function get_addr_float(sequence idval) -- Set Value in existing ID memory or create new ID and allocate memory return the adress
 atom addr=get_addr_(idval[1])
 if (addr>0) then
     poke(addr,atom_to_float32(idval[2]))
@@ -445,6 +462,19 @@ else
 end if
 return addr
 end function
+
+global function get_addr_int(sequence idval)
+atom addr=get_addr_(idval[1])
+if (addr>0) then
+    poke4(addr,idval[2])
+else
+    ids=append(ids,{idval[1],allocate(8)})
+    addr=get_addr_(idval[1])
+    poke4(addr,idval[2])  -- for setting a start value
+end if
+return addr
+end function
+
 
 function get_addr_music(sequence idval)
 atom addr=get_addr_(idval[1])
@@ -1340,11 +1370,17 @@ public function LoadShaderFromMemory(sequence vsCode,sequence fsCode)
 end function
 
 public function IsShaderValid(sequence shader)
-        return c_func(xIsShaderValid,{shader})
+atom addr=get_addr_shader({shader[3],shader})
+        return c_func(xIsShaderValid,{addr})
 end function
 
 public function GetShaderLocation(sequence shader,sequence uniformName)
-        return c_func(xGetShaderLocation,{shader,uniformName})
+atom addr=get_addr_shader({shader[3],shader})
+atom pstr=allocate_string(uniformName)
+atom result
+        result= c_func(xGetShaderLocation,{addr,pstr})
+free(pstr)
+return result
 end function
 
 public function GetShaderLocationAttrib(sequence shader,sequence attribName)
@@ -1352,7 +1388,47 @@ public function GetShaderLocationAttrib(sequence shader,sequence attribName)
 end function
 
 public procedure SetShaderValue(sequence shader,atom locIndex,object val,atom uniformType)
-        c_proc(xSetShaderValue,{shader,locIndex,val,uniformType})
+atom addr=get_addr_shader({shader[3],shader})
+atom val1
+if atom (val) 
+then
+    val1=allocate(8)
+    if not(uniformType) --SHADER_UNIFORM_FLOAT = 0
+    then
+        poke(val1,atom_to_float32(val))
+    else
+        poke4(val1,val)
+    end if
+else
+    val1=allocate(4*length(val))
+    if uniformType=SHADER_UNIFORM_VEC2 then
+        poke(val1,atom_to_float32(val[1]))
+        poke(val1+4,atom_to_float32(val[2]))
+    elsif uniformType=SHADER_UNIFORM_VEC3 then
+        poke(val1,atom_to_float32(val[1]))
+        poke(val1+4,atom_to_float32(val[2]))
+        poke(val1+8,atom_to_float32(val[3]))
+    elsif uniformType=SHADER_UNIFORM_VEC4 then
+        poke(val1,atom_to_float32(val[1]))
+        poke(val1+4,atom_to_float32(val[2]))
+        poke(val1+8,atom_to_float32(val[3]))
+        poke(val1+12,atom_to_float32(val[4]))
+    elsif uniformType=SHADER_UNIFORM_IVEC2 then
+        poke4(val1,val[1])
+        poke4(val1+4,val[2])
+    elsif uniformType=SHADER_UNIFORM_IVEC3 then
+        poke4(val1,val[1])
+        poke4(val1+4,val[2])
+        poke4(val1+8,val[3])
+    elsif uniformType=SHADER_UNIFORM_IVEC4 then
+        poke4(val1,val[1])
+        poke4(val1+4,val[2])
+        poke4(val1+8,val[3])
+        poke4(val1+12,val[4])
+    end if  
+end if
+        c_proc(xSetShaderValue,{addr,locIndex,val1,uniformType})
+free(val1)
 end procedure
 
 public procedure SetShaderValueV(sequence shader,atom locIndex,object val,atom uniformType,atom count)
@@ -4170,7 +4246,7 @@ public constant xLoadWave = define_c_func(ray,"+LoadWave",{C_STRING},Wave),
                                 xIsWaveValid = define_c_func(ray,"+IsWaveValid",{Wave},C_BOOL),
                                 xLoadSound = define_c_func(ray,"+LoadSound",{C_HPTR,C_STRING},Sound),
                                 xLoadSoundFromWave = define_c_func(ray,"+LoadSoundFromWave",{Wave},Sound),
-                                xLoadSoundAlias = define_c_func(ray,"+LoadSoundAlias",{Sound},Sound),
+                                xLoadSoundAlias = define_c_func(ray,"+LoadSoundAlias",{C_HPTR,Sound},Sound),
                                 xIsSoundValid = define_c_func(ray,"+IsSoundValid",{Sound},C_BOOL),
                                 xUpdateSound = define_c_proc(ray,"+UpdateSound",{Sound,C_POINTER,C_INT}),
                                 xUnloadWave = define_c_proc(ray,"+UnloadWave",{Wave}),
@@ -4195,17 +4271,12 @@ public function LoadSound(sequence fName)
 atom pstr=allocate_string(fName)
 atom mem=allocate(32)
 atom erg
-sequence snd={0,0,0,0,0,0}
+sequence snd=Tsound
         erg= c_func(xLoadSound,{mem,pstr})
 if not equal(erg,mem) then
     crash("Something ugly in : LoadSound")
 end if
-snd[1]=peek8u(mem)
-snd[2]=peek8u(mem+8)
-snd[3]=peek4u(mem+16)
-snd[4]=peek4u(mem+20)
-snd[5]=peek4u(mem+24)
-snd[6]=peek4u(mem+28)       
+snd=peek_sound(erg) 
 free(pstr)
 free(mem)
 return(snd)
@@ -4216,7 +4287,15 @@ public function LoadSoundFromWave(sequence wave)
 end function
 
 public function LoadSoundAlias(sequence source)
-        return c_func(xLoadSoundAlias,{source})
+atom mem=allocate(size_sound)
+atom src=allocate(size_sound)
+atom erg
+sequence snd=Tsound
+        erg = c_func(xLoadSoundAlias,{mem,poke_sound(src,source)})
+snd=peek_sound(erg) 
+free(mem)
+free(src)
+return(snd)
 end function
 
 public function IsSoundValid(sequence sound)
@@ -4231,12 +4310,16 @@ public procedure UnloadWave(sequence wave)
         c_proc(xUnloadWave,{wave})
 end procedure
 
-public procedure UnloadSound(sequence sound)
-        c_proc(xUnloadSound,{sound})
+public procedure UnloadSound(sequence sound_)
+atom mem=allocate(size_sound)
+        c_proc(xUnloadSound,{poke_sound(mem,sound_)})
+free(mem)
 end procedure
 
 public procedure UnloadSoundAlias(sequence alias)
-        c_proc(xUnloadSoundAlias,{alias})
+atom mem=allocate(size_sound)
+        c_proc(xUnloadSoundAlias,{poke_sound(mem,alias)})
+free(mem)
 end procedure
 
 public function ExportWave(sequence wave,sequence fName)
@@ -4263,43 +4346,51 @@ public constant xPlaySound = define_c_proc(ray,"+PlaySound",{Sound}),
                                 xUnloadWaveSamples = define_c_proc(ray,"+UnloadWaveSamples",{C_POINTER})
                                 
 public procedure PlaySound(sequence snd)
-atom mem=allocate(32)
-poke8(mem,snd[1])
-poke8(mem+8,snd[2])
-poke4(mem+16,snd[3])
-poke4(mem+20,snd[4])
-poke4(mem+24,snd[5])
-poke4(mem+28,snd[6])
-        c_proc(xPlaySound,{mem})
+atom mem=allocate(size_sound)
+        c_proc(xPlaySound,{poke_sound(mem,snd)})
 free(mem)
 end procedure
 
 public procedure StopSound(sequence snd)
-        c_proc(xStopSound,{snd})
+atom mem=allocate(size_sound)
+        c_proc(xStopSound,{poke_sound(mem,snd)})
+free(mem)
 end procedure
 
 public procedure PauseSound(sequence snd)
-        c_proc(xPauseSound,{snd})
+atom mem=allocate(size_sound)
+        c_proc(xPauseSound,{poke_sound(mem,snd)})
+free(mem)
 end procedure
 
 public procedure ResumeSound(sequence snd)
-        c_proc(xResumeSound,{snd})
+atom mem=allocate(size_sound)
+        c_proc(xResumeSound,{poke_sound(mem,snd)})
+free(mem)
 end procedure
 
 public function IsSoundPlaying(sequence snd)
-        return c_func(xIsSoundPlaying,{snd})
+atom mem=allocate(size_sound)
+        return c_func(xIsSoundPlaying,{poke_sound(mem,snd)})
+free(mem)
 end function
 
 public procedure SetSoundVolume(sequence snd,atom vol)
-        c_proc(xSetSoundVolume,{snd,vol})
+atom mem=allocate(size_sound)
+        c_proc(xSetSoundVolume,{poke_sound(mem,snd),vol})
+free(mem)
 end procedure
 
 public procedure SetSoundPitch(sequence snd,atom pit)
-        c_proc(xSetSoundPitch,{snd,pit})
+atom mem=allocate(size_sound)
+        c_proc(xSetSoundPitch,{poke_sound(mem,snd),pit})
+free(mem)
 end procedure
 
 public procedure SetSoundPan(sequence snd,atom pan)
-        c_proc(xSetSoundPan,{snd,pan})
+atom mem=allocate(size_sound)
+        c_proc(xSetSoundPan,{poke_sound(mem,snd),pan})
+free(mem)
 end procedure
 
 public function WaveCopy(sequence wav)
@@ -4723,6 +4814,21 @@ free(mem)
 return result
 end function
 
+constant xVector3Subtract = define_c_func(ray,"+Vector3Subtract",{C_HPTR,Vector3,Vector3},Vector3)
+
+global function Vector3Subtract(sequence v,sequence v2)
+atom vec1=allocate(size_vector3)
+atom vec2=allocate(size_vector3)
+atom mem=allocate(size_vector3)
+sequence result={0,0,0}
+atom ptr
+        ptr = c_func(xVector3Subtract,{mem,poke_vector3(vec1,v),poke_vector3(vec2,v2)})
+result=peek_vector3(ptr)
+free(vec1)
+free(vec2)
+free(mem)
+return result
+end function
 
 
 export constant xClamp = define_c_func(ray,"+Clamp",{C_FLOAT,C_FLOAT,C_FLOAT},C_FLOAT)
@@ -4891,15 +4997,30 @@ global constant xGuiLabel = define_c_func(ray,"+GuiLabel",{Rectangle,C_STRING},C
                                 xGuiCheckBox = define_c_func(ray,"+GuiCheckBox",{Rectangle,C_STRING,C_POINTER},C_INT),
                                 xGuiComboBox = define_c_func(ray,"+GuiComboBox",{Rectangle,C_STRING,C_POINTER},C_INT)
 public function GuiLabel(sequence bounds,sequence text)
-        return c_func(xGuiLabel,{bounds,text})
+atom memrect=allocate(size_rectangle)
+atom pstr=allocate_string(text)
+        return c_func(xGuiLabel,{poke_rectangle(memrect,bounds),pstr})
+free(pstr)
+free(memrect)       
 end function
 
 public function GuiButton(sequence bounds,sequence text)
-        return c_func(xGuiButton,{bounds,text})
+atom memrect=allocate(size_rectangle)
+atom pstr=allocate_string(text)
+atom result
+        result = c_func(xGuiButton,{poke_rectangle(memrect,bounds),pstr})
+free(pstr)
+free(memrect)
+return and_bits(result,1)
 end function
 
 public function GuiLabelButton(sequence bounds,sequence text)
-        return c_func(xGuiLabelButton,{bounds,text})
+atom memrect=allocate(size_rectangle)
+atom pstr=allocate_string(text)
+atom result
+        result = c_func(xGuiLabelButton,{poke_rectangle(memrect,bounds),pstr})
+free(pstr)
+free(memrect)return and_bits(result,1)
 end function
 
 public function GuiToggle(sequence bounds,sequence text,sequence  idval)
@@ -4914,8 +5035,17 @@ free(pstr1)
     return and_bits(val,1)
 end function
 
-public function GuiToggleGroup(sequence bounds,sequence text,atom active)
-        return c_func(xGuiToggleGroup,{bounds,text,active})
+public function GuiToggleGroup(sequence bounds,sequence text,sequence  idval)
+atom memrect=allocate(size_rectangle)
+atom pstr=allocate_string(text)
+atom addr,result,val
+addr=get_addr_int(idval)
+        result = c_func(xGuiToggleGroup,{poke_rectangle(memrect,bounds),pstr,addr})
+val=peek4s(addr)
+free(memrect)
+free(pstr)
+
+return val
 end function
 
 public function GuiToggleSlider(sequence bounds,sequence text,atom active)
@@ -5075,7 +5205,7 @@ atom memrect=allocate(size_rectangle)
 atom pstr1=allocate_string(lefttext)
 atom pstr2=allocate_string(righttext)
 atom result,val,addr
-addr=get_addr(idval)
+addr=get_addr_float(idval)
 
         result= c_func(xGuiSliderBar,{poke_rectangle(memrect,bounds),pstr1,pstr2,addr,min_,max_})
 val=float32_to_atom(peek({addr,4}))

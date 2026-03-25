@@ -83,7 +83,9 @@ Examples using raylib audio functionality, including sound/music loading and pla
 |-----------|--------|:-------------------:|:------------------:|:-----------------------:|:----------------------|
 | [audio_module_playing](audio/audio_module_playing.ex) | <img src="audio/audio_module_playing.png" alt="audio_module_playing" width="80"> | ⭐☆☆☆ | 1.5 | 3.5 | [Ramon Santamaria](https://github.com/raysan5) |
 | [audio_music_stream](audio/audio_music_stream.ex) | <img src="audio/audio_music_stream.png" alt="audio_music_stream" width="80"> | ⭐☆☆☆ | 1.3 | 4.2 | [Ramon Santamaria](https://github.com/raysan5) |
-
+| [audio_sound_multi](audio/audio_sound_multi.ex) | <img src="audio/audio_sound_multi.png" alt="audio_sound_multi" width="80"> | ⭐⭐☆☆ | 5.0 | 5.0 | [Jeffery Myers](https://github.com/JeffM2501) |
+| [audio_sound_positioning](audio/audio_sound_positioning.ex) | <img src="audio/audio_sound_positioning.png" alt="audio_sound_positioning" width="80"> | ⭐⭐☆☆ | 5.5 | 5.5 | [Le Juez Victor](https://github.com/Bigfoot71) |
+| [audio_sound_loading](audio/audio_sound_loading.ex) | <img src="audio/audio_sound_loading.png" alt="audio_sound_loading" width="80"> | ⭐☆☆☆ | 1.1 | 3.5 | [Ramon Santamaria](https://github.com/raysan5) |
 
 ### category: shaders [xx]
 
@@ -92,7 +94,8 @@ Examples using raylib shaders functionality, including shaders loading, paramete
 |  example  | image  | difficulty<br>level | version<br>created | last version<br>updated | original<br>developer |
 |-----------|--------|:-------------------:|:------------------:|:-----------------------:|:----------------------|
 | [shaders_shapes_textures](shaders/shaders_shapes_textures.ex) | <img src="shaders/shaders_shapes_textures.png" alt="shaders_shapes_textures" width="80"> | ⭐⭐☆☆ | 1.7 | 3.7 | [Ramon Santamaria](https://github.com/raysan5) |
-
+| [shaders_ascii_rendering](shaders/shaders_ascii_rendering.ex) | <img src="shaders/shaders_ascii_rendering.png" alt="shaders_ascii_rendering" width="80"> | ⭐⭐☆☆ | 5.5 | 5.6 | [Maicon Santana](https://github.com/maiconpintoabreu) |
+| [shaders_color_correction](shaders/shaders_color_correction.ex) | <img src="shaders/shaders_color_correction.png" alt="shaders_color_correction" width="80"> | ⭐⭐☆☆ | 5.6 | 5.6 | [Jordi Santonja](https://github.com/JordSant) |
 ### category: text [xx]
 
 Examples using raylib text functionality, including sprite fonts loading/generation and text drawing, provided by raylib [text](../src/rtext.c) module.
