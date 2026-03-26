@@ -1440,7 +1440,10 @@ public procedure SetShaderValueMatrix(sequence shader,atom locIndex,sequence mat
 end procedure
 
 public procedure SetShaderValueTexture(sequence shader,atom locIndex,sequence texture)
-        c_proc(xSetShaderValueTexture,{shader,locIndex,texture})
+atom addr=get_addr_shader({shader[3],shader})
+atom mem=allocate(size_texture)
+        c_proc(xSetShaderValueTexture,{addr,locIndex,poke_texture(mem,texture)})
+free(mem)
 end procedure
 
 public procedure UnloadShader(sequence shader)
