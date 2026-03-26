@@ -8,3 +8,4 @@ This wrapper (binding) is still under development. The goal is to create the mos
 
 This wrapper (binding) is largely based on the work of Icy\_Viking (https://github.com/gAndy50/EuRayLib5)
 
+![Image from examples](https://github.com/andizk4kx/raylib-playground/blob/main/examples/shaders/shaders_color_correction.png)
