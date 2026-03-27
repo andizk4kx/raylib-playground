@@ -5,7 +5,7 @@ This wrapper (binding) is still under development. The goal is to create the mos
 “Under development” does not mean that it is non-functional or unstable, but rather that it is not yet complete. The best way to see the progress of development is to look at the [examples](https://github.com/andizk4kx/raylib-playground/tree/main/examples). 
 These also serve as documentation for using [rayLib](https://github.com/raysan5/raylib) with Phix.
 
-ou may also visit this small raylib introductory course developing a simple game [raylib-intro-course](https://github.com/andizk4kx/raylib-intro-course?tab=readme-ov-file) ported to Phix/Euphoria
+You may also visit this small raylib introductory course developing a simple game [raylib-intro-course](https://github.com/andizk4kx/raylib-intro-course?tab=readme-ov-file) ported to Phix/Euphoria
 
 This wrapper (binding) is largely based on the work of Icy\_Viking (https://github.com/gAndy50/EuRayLib5)
 
