@@ -1,6 +1,6 @@
 A playground for my experiments with [raylib](https://github.com/raysan5/raylib) (for [Phix](https://github.com/petelomax/Phix) and [Euphoria](https://github.com/OpenEuphoria/euphoria))
 
-A small raylib introductory course developing a simple game [raylib-intro-course](https://github.com/andizk4kx/raylib-intro-course?tab=readme-ov-file)
+You may also visit this small raylib introductory course developing a simple game [raylib-intro-course](https://github.com/andizk4kx/raylib-intro-course?tab=readme-ov-file) ported to Phix/Euphoria
 
 This wrapper (binding) is still under development. The goal is to create the most complete wrapper possible for [Phix](https://github.com/petelomax/Phix) on 64-bit Windows. 
 “Under development” does not mean that it is non-functional or unstable, but rather that it is not yet complete. The best way to see the progress of development is to look at the [examples](https://github.com/andizk4kx/raylib-playground/tree/main/examples). 
