@@ -475,19 +475,20 @@ end if
 return addr
 end function
 
-
+constant musicid=6
 function get_addr_music(sequence idval)
 atom addr=get_addr_(idval[1])
 if (addr>0) then
     return poke_music(addr,idval[2])
 else
-    ids=append(ids,{idval[1],allocate(64)})
+    ids=append(ids,{idval[1],allocate(size_music)})
     addr=get_addr_(idval[1])
     return poke_music(addr,idval[2])  -- for setting a start value
 end if
 --return addr
 end function
 
+constant shaderid=3
 function get_addr_shader(sequence idval)
 atom addr=get_addr_(idval[1])
 if (addr>0) then
@@ -499,6 +500,8 @@ else
 end if
 --return addr
 end function
+
+
 ---------------------------------------------------------------------------------------------------------------
 -- end little helper
 --Colors
@@ -2616,7 +2619,7 @@ atom mem=allocate(24)
 atom pstr=allocate_string(fName)
 sequence result={0,0,0,0,0}
 atom ptr=0
-        ptr = c_func(xLoadImage,{mem,fName})
+        ptr = c_func(xLoadImage,{mem,pstr})
 result[1]=peek8u(mem)
 result[2]=peek4s(mem+8)
 result[3]=peek4s(mem+12)
@@ -3247,11 +3250,13 @@ public procedure GenTextureMipmaps(atom tex)
         c_proc(xGenTextureMipmaps,{tex})
 end procedure
 
-public procedure SetTextureFilter(sequence tex,atom filter)
+public function SetTextureFilter(sequence tex,atom filter)
 atom addr=allocate(size_texture)
         c_proc(xSetTextureFilter,{poke_texture(addr,tex),filter})
+sequence result=peek_texture(addr)
 free(addr)
-end procedure
+return result
+end function
 
 public procedure SetTextureWrap(sequence tex,atom _wrap)
         c_proc(xSetTextureWrap,{tex,_wrap})
@@ -3720,6 +3725,13 @@ text=match_replace("%i",text,"%d")
 end function
 
 public function TextSubtext(sequence text,atom pos,atom len)
+if pos=0 then pos=1 
+end if
+
+if pos+len>length(text) 
+then
+    return text[pos..$] 
+end if
         return text[pos..pos+len]
     --  return c_func(xTextSubtext,{text,pos,len})
 end function
