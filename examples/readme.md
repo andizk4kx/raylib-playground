@@ -29,7 +29,7 @@ Examples using raylib [core](../src/rcore.c) module platform functionality: wind
 | [core_3d_camera_fps](core/core_3d_camera_fps.ex) | <img src="core/core_3d_camera_fps.png" alt="core_3d_camera_fps" width="80"> | ⭐⭐⭐☆ | 5.5 | 5.5 | [Agnis Aldiņš](https://github.com/nezvers) |
 | [core_window_flags](core/core_window_flags.ex) | <img src="core/core_window_flags.png" alt="core_window_flags" width="80"> | ⭐⭐⭐☆ | 3.5 | 3.5 | [Ramon Santamaria](https://github.com/raysan5) |
 | [core_render_texture](core/core_render_texture.ex) | <img src="core/core_render_texture.png" alt="core_render_texture" width="80"> | ⭐☆☆☆ | 5.6-dev | 5.6-dev | [Ramon Santamaria](https://github.com/raysan5) |
-
+| [core_basic_screen_manager](core/core_basic_screen_manager.c) | <img src="core/core_basic_screen_manager.png" alt="core_basic_screen_manager" width="80"> | ⭐☆☆☆ | 4.0 | 4.0 | [Ramon Santamaria](https://github.com/raysan5) |
 ### category: shapes [xx]
 
 Examples using raylib shapes drawing functionality, provided by raylib [shapes](../src/rshapes.c) module.
