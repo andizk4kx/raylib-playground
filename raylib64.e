@@ -155,6 +155,15 @@ sequence result={0,0,0}
 return result
 end function
 
+constant size_boundingbox=32
+global sequence Tboundingbox={{0,0,0},{0,0,0}} 
+function poke_boundingbox(atom addr,sequence box)
+atom dummy
+    dummy=poke_vector3(addr,box[1])
+    dummy=poke_vector3(addr+12,box[2]) -- overlap padding
+    return addr
+end function
+
 constant size_vector4=16
 function poke_vector4(atom addr,sequence vector4)
     poke(addr,atom_to_float32(vector4[1]))
@@ -3387,7 +3396,7 @@ public function ColorFromNormalized(sequence norm)
 end function
 
 public function ColorToHSV(sequence col)
-        return c_func(xColorToHSV,{col})
+        return c_func(xColorToHSV,{bytes_to_int(col)})
 end function
 
 public function ColorFromHSV(atom hue,atom saturation,atom val)
@@ -3464,16 +3473,16 @@ public function GetColor(atom hex)
         return int_to_bytes(c_func(xGetColor,{hex}))
 end function
 
-public function GetPixelColor(atom ptr,atom format)
-        return int_to_bytes(c_func(xGetPixelColor,{ptr,format}))
+public function GetPixelColor(atom ptr,atom _format)
+        return int_to_bytes(c_func(xGetPixelColor,{ptr,_format}))
 end function
 
-public procedure SetPixelColor(atom ptr,sequence col,atom format)
-        c_proc(xSetPixelColor,{ptr,col,format})
+public procedure SetPixelColor(atom ptr,sequence col,atom _format)
+        c_proc(xSetPixelColor,{ptr,bytes_to_int(col),_format})
 end procedure
 
-public function GetPixelDataSize(atom width,atom height,atom format)
-        return c_func(xGetPixelDataSize,{width,height,format})
+public function GetPixelDataSize(atom width,atom height,atom _format)
+        return c_func(xGetPixelDataSize,{width,height,_format})
 end function
 
 --Font loading functions
@@ -3705,7 +3714,10 @@ public constant xTextCopy = define_c_func(ray,"+TextCopy",{C_POINTER,C_STRING},C
                                 xTextToCamel = define_c_func(ray,"+TextToCamel",{C_STRING},C_STRING)
                                 
 public function TextCopy(object dst,sequence src)
-        return c_func(xTextCopy,{dst,src})
+        --dst=src
+        -- need to wrap this in Eu/Phix
+        return length(dst)
+        --return c_func(xTextCopy,{dst,src})
 end function
 
 public function TextIsEqual(sequence text,sequence text2)   
@@ -3737,11 +3749,13 @@ end if
 end function
 
 public function TextReplace(sequence text,sequence replace_,sequence _by)
-        return c_func(xTextReplace,{text,replace_,_by})
+        return match_replace(text,replace_,_by)
+        --return c_func(xTextReplace,{text,replace_,_by})
 end function
 
-public function TextInsert(sequence text,sequence insert,atom pos)
-        return c_func(xTextInsert,{text,insert,pos})
+public function TextInsert(sequence text,sequence _insert,atom pos)
+        return text[1..pos]&_insert&text[pos+1..$]
+        --return c_func(xTextInsert,{text,insert,pos})
 end function
 
 public function TextJoin(sequence text,atom count,sequence del)
@@ -3817,23 +3831,39 @@ public constant xDrawLine3D = define_c_proc(ray,"+DrawLine3D",{Vector3,Vector3,C
                                 xDrawGrid = define_c_proc(ray,"+DrawGrid",{C_INT,C_FLOAT})
                                 
 public procedure DrawLine3D(sequence start,sequence ep,sequence col)
-        c_proc(xDrawLine3D,{start,ep,col})
+atom v1=allocate(size_vector3)
+atom v2=allocate(size_vector3)
+        c_proc(xDrawLine3D,{poke_vector3(v1,start),poke_vector3(v2,ep),bytes_to_int(col)})
+free(v1)
+free(v2)
 end procedure
 
 public procedure DrawPoint3D(sequence pos,sequence col)
-        c_proc(xDrawPoint3D,{pos,col})
+atom v1=allocate(size_vector3)
+        c_proc(xDrawPoint3D,{poke_vector3(v1,pos),bytes_to_int(col)})
+free(v1)
 end procedure
 
 public procedure DrawCircle3D(sequence center,atom rad,sequence rotaxis,atom rotang,sequence col)
-        c_proc(xDrawCircle3D,{center,rad,rotaxis,rotang,col})
+atom v1=allocate(size_vector3)
+atom v2=allocate(size_vector3)
+        c_proc(xDrawCircle3D,{poke_vector3(v1,center),rad,poke_vector3(v2,rotaxis),rotang,bytes_to_int(col)})
+free(v1)
+free(v2)
 end procedure
 
-public procedure DrawTriangle3D(sequence v,sequence v2,sequence v3,sequence col)
-        c_proc(xDrawTriangle3D,{v,v2,v3,col})
+public procedure DrawTriangle3D(sequence vd1,sequence vd2,sequence vd3,sequence col)
+atom v1=allocate(size_vector3)
+atom v2=allocate(size_vector3)
+atom v3=allocate(size_vector3)
+        c_proc(xDrawTriangle3D,{poke_vector3(v1,vd1),poke_vector3(v2,vd2),poke_vector3(v3,vd3),bytes_to_int(col)})
+free(v1)
+free(v2)
+free(v3)
 end procedure
 
 public procedure DrawTriangleStrip3D(atom pts,atom count,sequence col)
-        c_proc(xDrawTriangleStrip3D,{pts,count,col})
+        c_proc(xDrawTriangleStrip3D,{pts,count,bytes_to_int(col)})
 end procedure
 
 public procedure DrawCube(sequence pos,atom width,atom height,atom len,sequence col)
@@ -3877,35 +3907,59 @@ free(v1)
 end procedure
 
 public procedure DrawSphereEx(sequence pos,atom rad,atom rings,atom slices,sequence col)
-        c_proc(xDrawSphereEx,{pos,rad,rings,slices,col})
+atom v1=allocate(size_vector3)
+        c_proc(xDrawSphereEx,{poke_vector3(v1,pos),rad,rings,slices,bytes_to_int(col)})
+free(v1)
 end procedure
 
 public procedure DrawSphereWires(sequence pos,atom rad,atom rings,atom slices,sequence col)
-        c_proc(xDrawSphereWires,{pos,rad,rings,slices,col})
+atom v1=allocate(size_vector3)
+        c_proc(xDrawSphereWires,{poke_vector3(v1,pos),rad,rings,slices,bytes_to_int(col)})
+free(v1)
 end procedure
 
 public procedure DrawCylinder(sequence pos,atom radtop,atom radbot,atom height,atom slices,sequence col)
-        c_proc(xDrawCylinder,{pos,radtop,radbot,height,slices,col})
+atom v1=allocate(size_vector3)
+        c_proc(xDrawCylinder,{poke_vector3(v1,pos),radtop,radbot,height,slices,bytes_to_int(col)})
+free(v1)
 end procedure
 
 public procedure DrawCylinderEx(sequence start,sequence ep,atom startrad,atom endrad,atom sides,sequence col)
-        c_proc(xDrawCylinderEx,{start,ep,startrad,endrad,sides,col})
+atom v1=allocate(size_vector3)
+atom v2=allocate(size_vector3)
+        c_proc(xDrawCylinderEx,{poke_vector3(v1,start),poke_vector3(v2,ep),startrad,endrad,sides,bytes_to_int(col)})
+free(v1)
+free(v2)
 end procedure
 
 public procedure DrawCylinderWires(sequence pos,atom radtop,atom radbot,atom height,atom slices,sequence col)
-        c_proc(xDrawCylinderWires,{pos,radtop,radbot,height,slices,col})
+atom v1=allocate(size_vector3)
+        c_proc(xDrawCylinderWires,{poke_vector3(v1,pos),radtop,radbot,height,slices,col})
+free(v1)
 end procedure
 
 public procedure DrawCylinderWiresEx(sequence start,sequence ep,atom startrad,atom endrad,atom sides,sequence col)
-        c_proc(xDrawCylinderWiresEx,{start,ep,startrad,endrad,sides,col})
+atom v1=allocate(size_vector3)
+atom v2=allocate(size_vector3)
+        c_proc(xDrawCylinderWiresEx,{poke_vector3(v1,start),poke_vector3(v2,ep),startrad,endrad,sides,bytes_to_int(col)})
+free(v1)
+free(v2)
 end procedure
 
 public procedure DrawCapsule(sequence startpos,sequence ep,atom rad,atom slices,atom rings,sequence col)
-        c_proc(xDrawCapsule,{startpos,ep,rad,slices,rings,col})
+atom v1=allocate(size_vector3)
+atom v2=allocate(size_vector3)
+        c_proc(xDrawCapsule,{poke_vector3(v1,startpos),poke_vector3(v2,ep),rad,slices,rings,bytes_to_int(col)})
+free(v1)
+free(v2)
 end procedure
 
 public procedure DrawCapsuleWires(sequence start,sequence ep,atom rad,atom slices,atom rings,sequence col)
-        c_proc(xDrawCapsuleWires,{start,ep,rad,slices,rings,col})
+atom v1=allocate(size_vector3)
+atom v2=allocate(size_vector3)
+        c_proc(xDrawCapsuleWires,{poke_vector3(v1,start),poke_vector3(v2,ep),rad,slices,rings,bytes_to_int(col)})
+free(v1)
+free(v2)
 end procedure
 
 public procedure DrawPlane(sequence pos,sequence size,sequence  col)
@@ -3913,9 +3967,9 @@ atom mem=allocate(size_vector3)
         c_proc(xDrawPlane,{poke_vector3(mem,pos),V2toReg(size),bytes_to_int(col)})
 free(mem)
 end procedure
-
+--CHECK ray is still missing
 public procedure DrawRay(sequence ray,sequence col)
-        c_proc(xDrawPlane,{ray,col})
+        c_proc(xDrawPlane,{ray,bytes_to_int(col)})
 end procedure
 
 public procedure DrawGrid(atom slices,atom space)
@@ -3986,7 +4040,9 @@ public procedure DrawModelPointsEx(sequence model,sequence pos,sequence rotAxis,
 end procedure
 
 public procedure DrawBoundingBox(sequence box,sequence col)
-        c_proc(xDrawBoundingBox,{box,col})
+atom box1=allocate(size_boundingbox)
+        c_proc(xDrawBoundingBox,{poke_boundingbox(box1,box),bytes_to_int(col)})
+free(box1)
 end procedure
 --{Camera,Texture2D,Vector3,C_FLOAT,C_Color}
 public procedure DrawBillboard(sequence cam,sequence tex,sequence pos,atom scale,sequence tint)
@@ -4197,15 +4253,27 @@ public constant xCheckCollisionSpheres = define_c_func(ray,"+CheckCollisionSpher
                                 xGetRayCollisionQuad = define_c_func(ray,"+GetRayCollisionQuad",{Ray,Vector3,Vector3,Vector3,Vector3},RayCollision)
                                 
 public function CheckCollisionSpheres(sequence center,atom rad,sequence center2,atom rad2)
-        return c_func(xCheckCollisionSpheres,{center,rad,center2,rad2})
+atom vec1=allocate(size_vector3)
+atom vec2=allocate(size_vector3)
+        return and_bits(c_func(xCheckCollisionSpheres,{poke_vector3(vec1,center),rad,poke_vector3(vec2,center2),rad2}),1)
+free(vec1)
+free(vec2)
 end function
 
 public function CheckCollisionBoxes(sequence box,sequence box2)
-        return c_func(xCheckCollisionBoxes,{box,box2})
+atom box_1=allocate(size_boundingbox)
+atom box_2=allocate(size_boundingbox)
+        return and_bits(c_func(xCheckCollisionBoxes,{poke_boundingbox(box_1,box),poke_boundingbox(box_2,box2)}),1)
+free(box_1)
+free(box_2)
 end function
 
 public function CheckCollisionBoxSphere(sequence box,sequence center,atom rad)
-        return c_func(xCheckCollisionBoxSphere,{box,center,rad})
+atom box_1=allocate(size_boundingbox)
+atom vec1=allocate(size_boundingbox)
+        return c_func(xCheckCollisionBoxSphere,{poke_boundingbox(box_1,box),poke_vector3(vec1,center),rad})
+free(box_1)
+free(vec1)
 end function
 
 public function GetRayCollisionSphere(sequence ray,sequence center,atom rad)
