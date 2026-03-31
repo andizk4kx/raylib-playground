@@ -4709,6 +4709,10 @@ end procedure
 --# raymath functions   appended as needed                                                              #
 --#                                                                                                     #
 --#########################################################################################################
+global function Vector2Zero()
+    return {0,0}
+end function
+
 constant xVector2Normalize = define_c_func(ray,"+Vector2Normalize",{Vector2},Vector2)
 
 global function Vector2Normalize(sequence v)
@@ -4730,6 +4734,12 @@ end function
 --integer x=1,y=2
 --  return { v1[x] + v2[x], v1[y] + v2[y] }
 --end function
+
+constant xVector2Distance = define_c_func(ray,"+Vector2Distance",{Vector2,Vector2},C_FLOAT)
+
+global function Vector2Distance(sequence v,sequence v2)
+         return c_func(xVector2Distance,{V2toReg(v),V2toReg(v2)})
+end function
 
 constant xVector2Scale = define_c_func(ray,"+Vector2Scale",{Vector2,C_FLOAT},Vector2)
 

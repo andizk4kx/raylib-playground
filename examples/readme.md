@@ -54,6 +54,7 @@ Examples using raylib shapes drawing functionality, provided by raylib [shapes](
 | [shapes_starfield_effect](shapes/shapes_starfield_effect.ex) | <img src="shapes/shapes_starfield_effect.png" alt="shapes_starfield_effect" width="80"> | ⭐⭐☆☆ | 5.5 | 5.6-dev | [JP Mortiboys](https://github.com/themushroompirates) |
 | [shapes_ball_physics](shapes/shapes_ball_physics.ex) | <img src="shapes/shapes_ball_physics.png" alt="shapes_ball_physics" width="80"> | ⭐⭐☆☆ | 5.6-dev | 5.6-dev | [David Buzatto](https://github.com/davidbuzatto) |
 | [shapes_triangle_strip](shapes/shapes_triangle_strip.ex) | <img src="shapes/shapes_triangle_strip.png" alt="shapes_triangle_strip" width="80"> | ⭐⭐☆☆ | 5.6-dev | 5.6-dev | [Jopestpe](https://github.com/jopestpe) |
+| [shapes_lines_drawing](shapes/shapes_lines_drawing.ex) | <img src="shapes/shapes_lines_drawing.png" alt="shapes_lines_drawing" width="80"> | ⭐☆☆☆ | 5.6-dev | 5.6 | [Robin](https://github.com/RobinsAviary) |
 ## category: textures [xx]
 
 Examples using raylib textures functionality, including image/textures loading/generation and drawing, provided by raylib [textures](../src/rtextures.c) module.
