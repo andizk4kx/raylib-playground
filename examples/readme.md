@@ -98,6 +98,7 @@ Examples using raylib shaders functionality, including shaders loading, paramete
 | [shaders_ascii_rendering](shaders/shaders_ascii_rendering.ex) | <img src="shaders/shaders_ascii_rendering.png" alt="shaders_ascii_rendering" width="80"> | ⭐⭐☆☆ | 5.5 | 5.6 | [Maicon Santana](https://github.com/maiconpintoabreu) |
 | [shaders_color_correction](shaders/shaders_color_correction.ex) | <img src="shaders/shaders_color_correction.png" alt="shaders_color_correction" width="80"> | ⭐⭐☆☆ | 5.6 | 5.6 | [Jordi Santonja](https://github.com/JordSant) |
 | [shaders_multi_sample2d](shaders/shaders_multi_sample2d.ex) | <img src="shaders/shaders_multi_sample2d.png" alt="shaders_multi_sample2d" width="80"> | ⭐⭐☆☆ | 3.5 | 3.5 | [Ramon Santamaria](https://github.com/raysan5) |
+| [shaders_custom_uniform](shaders/shaders_custom_uniform.ex) | <img src="shaders/shaders_custom_uniform.png" alt="shaders_custom_uniform" width="80"> | ⭐⭐☆☆ | 1.3 | 4.0 | [Ramon Santamaria](https://github.com/raysan5) |
 ### category: text [xx]
 
 Examples using raylib text functionality, including sprite fonts loading/generation and text drawing, provided by raylib [text](../src/rtext.c) module.

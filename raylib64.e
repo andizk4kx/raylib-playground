@@ -164,6 +164,13 @@ atom dummy
     return addr
 end function
 
+function peek_boundingbox(atom mem)
+sequence result=Tboundingbox
+        result[1]=peek_vector3(mem)
+        result[2]=peek_vector3(mem+12)
+return result
+end function
+
 constant size_vector4=16
 function poke_vector4(atom addr,sequence vector4)
     poke(addr,atom_to_float32(vector4[1]))
@@ -409,6 +416,174 @@ dummy=  poke_texture(mem+12,font[4])
         poke8(mem+40,font[6])
 return mem
 end function
+
+constant size_matrix=64
+constant Tmatrix={{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}}
+function peek_matrix(atom mem)
+sequence M=Tmatrix
+-- Erste Zeile von M (Index 1)
+M[1][1] = peek_float32(mem + 0)
+M[1][2] = peek_float32(mem + 16)
+M[1][3] = peek_float32(mem + 32)
+M[1][4] = peek_float32(mem + 48)
+
+-- Zweite Zeile von M (Index 2)
+M[2][1] = peek_float32(mem + 4)
+M[2][2] = peek_float32(mem + 20)
+M[2][3] = peek_float32(mem + 36)
+M[2][4] = peek_float32(mem + 52)
+
+-- Dritte Zeile von M (Index 3)
+M[3][1] = peek_float32(mem + 8)
+M[3][2] = peek_float32(mem + 24)
+M[3][3] = peek_float32(mem + 40)
+M[3][4] = peek_float32(mem + 56)
+
+-- Vierte Zeile von M (Index 4)
+M[4][1] = peek_float32(mem + 12)
+M[4][2] = peek_float32(mem + 28)
+M[4][3] = peek_float32(mem + 44)
+M[4][4] = peek_float32(mem + 60)
+return M
+end function
+
+
+function poke_matrix(atom mem,sequence M)
+    -- Spalte 1 (X-Achse)
+poke_float32(mem + 0,  M[1][1])
+poke_float32(mem + 4,  M[2][1])
+poke_float32(mem + 8,  M[3][1])
+poke_float32(mem + 12, M[4][1])
+
+-- Spalte 2 (Y-Achse)
+poke_float32(mem + 16, M[1][2])
+poke_float32(mem + 20, M[2][2])
+poke_float32(mem + 24, M[3][2])
+poke_float32(mem + 28, M[4][2])
+
+-- Spalte 3 (Z-Achse)
+poke_float32(mem + 32, M[1][3])
+poke_float32(mem + 36, M[2][3])
+poke_float32(mem + 40, M[3][3])
+poke_float32(mem + 44, M[4][3])
+
+-- Spalte 4 (Translation/Position)
+poke_float32(mem + 48, M[1][4])
+poke_float32(mem + 52, M[2][4])
+poke_float32(mem + 56, M[3][4])
+poke_float32(mem + 60, M[4][4])
+return mem
+end function
+
+
+global enum matmap_texture=1,matmap_color=2
+constant size_materialmap=28 --28?
+constant Tmaterialmap={Ttexture,{0,0,0,0},0}
+global function peek_materialmap(atom mem)
+sequence matmap=Tmaterialmap
+    matmap[1]=peek_texture(mem)
+    matmap[2]=peek({mem+20,4})
+    matmap[3]=peek_float32(mem+24)
+return matmap
+end function
+
+global function poke_materialmap(atom mem,sequence matmap)
+atom dummy
+    dummy=poke_texture(mem,matmap[1])
+    poke(mem+20,matmap[2])
+    poke_float32(mem+24,matmap[3])
+return mem
+end function
+
+global enum mat_shader=1
+constant size_material=40
+constant Tmaterial={Tshader,0,0,0,0,0}
+global function peek_material(atom mem)
+sequence mat=Tmaterial
+    mat[1]=peek_shader(mem)
+    mat[2]=peek8u(mem+16) --pointer to materialmaps
+    mat[3]=peek_float32(mem+24)
+    mat[4]=peek_float32(mem+28)
+    mat[5]=peek_float32(mem+32)
+    mat[6]=peek_float32(mem+36)
+return mat
+end function
+
+global function poke_material(atom mem,sequence mat)
+atom dummy
+    dummy=poke_shader(mem,mat[1])
+    poke8(mem+16,mat[2])  -- pointer to materialmaps
+    poke_float32(mem+24,mat[3])
+    poke_float32(mem+28,mat[4])
+    poke_float32(mem+32,mat[5])
+    poke_float32(mem+36,mat[6])
+return mem
+end function
+
+--model[10]=materials model[10][1] materialmaps model[10][1][2][1]=texture material 0 materialmap 0
+global enum mod_materials=10,mod_materialmaps=2 
+constant  size_model=120
+constant Tmaterials={Tmaterial,repeat(Tmaterialmap,12)}
+constant Tmodel={Tmatrix,0,0,0,0,0,0,0,0}
+global function peek_model(atom mem)
+    -- Holt die Rohdaten der Model-Struktur (64-Bit Layout)
+    sequence model = {
+        peek_matrix(mem),      -- [1] transform (64 Bytes)
+        peek4s(mem + 64),      -- [2] meshCount (4 Bytes)
+        peek4s(mem + 68),      -- [3] materialCount (4 Bytes)
+        peek8u(mem + 72),      -- [4] meshes (Pointer, 8 Bytes)
+        peek8u(mem + 80),      -- [5] materials (Pointer, 8 Bytes)
+        peek8u(mem + 88),      -- [6] meshMaterial (Pointer, 8 Bytes)
+        peek4s(mem + 96),      -- [7] boneCount (4 Bytes)
+        peek8u(mem + 104),     -- [8] bones (Pointer, 8 Bytes)
+        peek8u(mem + 112)      -- [9] bindPose (Pointer, 8 Bytes)
+    }                           --[10] materials as a sequence
+    
+sequence materials=repeat(Tmaterials,model[3])
+for i=1 to model[3] do
+    materials[i][1]=peek_material(model[5]+((i-1)*size_material))
+    for j=1 to 12  do
+        materials[i][2][j]=peek_materialmap(materials[i][1][2]+((j-1)*size_materialmap))
+    end for
+end for
+model =append(model,materials)
+    return model
+end function
+
+global function poke_model(atom mem, sequence modl)
+atom dummy
+    -- mod = {matrix, meshCount, materialCount, pMeshes, pMaterials, pMeshMaterial, boneCount, pBones, pBindPose}
+    
+    -- 1. Die Matrix (belegt Offset 0 bis 63)
+    dummy=poke_matrix(mem, modl[1])
+    
+    -- 2. Integers (4 Bytes)
+    poke4(mem + 64, modl[2]) -- meshCount
+    poke4(mem + 68, modl[3]) -- materialCount
+    
+    -- 3. Pointer (8 Bytes auf 64-Bit)
+    poke8(mem + 72, modl[4]) -- meshes (pointer)
+    poke8(mem + 80, modl[5]) -- materials (pointer)
+    poke8(mem + 88, modl[6]) -- meshMaterial (pointer)
+    
+    -- 4. Animation / Bones
+    poke4(mem + 96, modl[7])  -- boneCount (4 Bytes)
+    -- Padding beachten: Raylib lässt oft 4 Bytes frei für 8-Byte Alignment des nächsten Pointers
+    poke8(mem + 104, modl[8]) -- bones (pointer)
+    poke8(mem + 112, modl[9]) -- bindPose (pointer)
+
+sequence materials=modl[10]
+atom addr
+for i=1 to modl[3] do
+    addr=(modl[5]+((i-1)*size_material))
+    dummy=poke_material(addr,materials[i][1])
+    for j=1 to 12  do
+        dummy=poke_materialmap(materials[i][1][2]+((j-1)*size_materialmap),materials[i][2][j])
+    end for
+end for
+return mem
+end function
+
 
 -- Helper (kind off a primitive state-manager) for GUI not in Raylib API handling for more Phix/Euphoria Style coding (less Pointer)
 sequence ids={{0,allocate(8)}}
@@ -3977,14 +4152,22 @@ public procedure DrawGrid(atom slices,atom space)
 end procedure
 
 --Model 3D Loading functions
-public constant xLoadModel = define_c_func(ray,"+LoadModel",{C_STRING},Model),
+public constant xLoadModel = define_c_func(ray,"+LoadModel",{C_HPTR,C_STRING},Model),
                                 xLoadModelFromMesh = define_c_func(ray,"+LoadModelFromMesh",{Mesh},Model),
                                 xIsModelValid = define_c_func(ray,"+IsModelValid",{Model},C_BOOL),
                                 xUnloadModel = define_c_proc(ray,"+UnloadModel",{Model}),
-                                xGetModelBoundingBox = define_c_func(ray,"+GetModelBoundingBox",{Model},BoundingBox)
+                                xGetModelBoundingBox = define_c_func(ray,"+GetModelBoundingBox",{C_HPTR,Model},BoundingBox)
                                 
 public function LoadModel(sequence fName)
-        return c_func(xLoadModel,{fName})
+atom pstr=allocate_string(fName)
+atom mem=allocate(size_model)
+atom ptr
+sequence result=Tmodel
+        ptr= c_func(xLoadModel,{mem,pstr})
+result=peek_model(ptr)
+free(pstr)
+free(mem)
+return result
 end function
 
 public function LoadModelFromMesh(sequence mesh)
@@ -3996,11 +4179,21 @@ public function IsModelValid(sequence model)
 end function
 
 public procedure UnloadModel(sequence model)
-        c_proc(xUnloadModel,{model})
+atom mem=allocate(size_model)
+        c_proc(xUnloadModel,{poke_model(mem,model)})
+free(mem)
 end procedure
 
 public function GetModelBoundingBox(sequence model)
-        return c_func(xGetModelBoundingBox,{model})
+atom modl=allocate(size_model)
+atom mem=allocate(size_boundingbox)
+sequence result
+atom ptr
+        ptr = c_func(xGetModelBoundingBox,{mem,poke_model(modl,model)})
+result=peek_boundingbox(ptr)
+free(mem)
+free(modl)
+return result
 end function
 
 --Model drawing functions
@@ -4016,7 +4209,11 @@ public constant xDrawModel = define_c_proc(ray,"+DrawModel",{Model,Vector3,C_FLO
                                 xDrawBillboardPro = define_c_proc(ray,"+DrawBillboardPro",{Camera,Texture2D,Rectangle,Vector3,Vector3,Vector2,Vector2,C_FLOAT,C_Color})
                                 
 public procedure DrawModel(sequence model,sequence pos,atom scale,sequence tint)
-        c_proc(xDrawModel,{model,pos,scale,tint})
+atom modl=allocate(size_model)
+atom vec1=allocate(size_vector3)
+        c_proc(xDrawModel,{poke_model(modl,model),poke_vector3(vec1,pos),scale,bytes_to_int(tint)})
+free(modl)
+free(vec1)
 end procedure
 
 public procedure DrawModelEx(sequence model,sequence pos,sequence rotAxis,atom rotAng,sequence scale,sequence tint)
