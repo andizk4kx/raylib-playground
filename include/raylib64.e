@@ -5120,6 +5120,26 @@ free(mem)
 return result
 end function
 
+constant xMatrixRotateXYZ = define_c_func(ray,"+MatrixRotateXYZ",{C_HPTR,Vector3},Matrix)
+
+global function MatrixRotateXYZ(sequence ang)
+atom mat = allocate(size_matrix)
+atom vec=allocate(size_vector3)
+atom ptr
+sequence matrix
+        ptr = c_func(xMatrixRotateXYZ,{mat,poke_vector3(vec,ang)})
+matrix=peek_matrix(ptr)
+free(mat)
+free(vec)
+return matrix
+end function
+
+constant xMatrixRotateZYX = define_c_func(ray,"+MatrixRotateZYX",{Vector3},Matrix)
+
+global function MatrixRotateZYX(sequence ang)
+        return c_func(xMatrixRotateZYX,{ang})
+end function
+
 
 export constant xClamp = define_c_func(ray,"+Clamp",{C_FLOAT,C_FLOAT,C_FLOAT},C_FLOAT)
 

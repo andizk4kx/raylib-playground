@@ -76,6 +76,7 @@ Examples using raylib models functionality, including models loading/generation 
 [models_billboard_rendering](models/models_billboard_rendering.ex) | <img src="models/models_billboard_rendering.png" alt="models_billboard_rendering" width="80"> | ⭐⭐⭐☆ | 1.3 | 3.5 | [Ramon Santamaria](https://github.com/raysan5) |
 |[models_directional_billboard](models/models_directional_billboard.ex) | <img src="models/models_directional_billboard.png" alt="models_directional_billboard" width="80"> | ⭐⭐☆☆ | 5.6-dev | 5.6 | [Robin](https://github.com/RobinsAviary) |
 |[models_box_collisions](models/models_box_collisions.ex) | <img src="models/models_box_collisions.png" alt="models_box_collisions" width="80"> | ⭐☆☆☆ | 1.3 | 3.5 | [Ramon Santamaria](https://github.com/raysan5) |
+| [models_yaw_pitch_roll](models/models_yaw_pitch_roll.ex) | <img src="models/models_yaw_pitch_roll.png" alt="models_yaw_pitch_roll" width="80"> | ⭐⭐☆☆ | 1.8 | 4.0 | [Berni](https://github.com/Berni8k) |
 ### category: audio [xx]
 
 Examples using raylib audio functionality, including sound/music loading and playing. This functionality is provided by raylib [raudio](../src/raudio.c) module. Note this module can be used standalone independently of raylib.
