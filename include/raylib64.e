@@ -95,6 +95,16 @@ if ray = 0 then
         abort(0)
 end if
 
+atom kernel=open_dll("kernel32.dll")
+atom gpa=define_c_func(kernel,"GetProcAddress",{C_INT64,C_INT64},C_INT64)
+function GetProcAddress(atom lib,sequence progname)
+    atom pstr=allocate_string(progname)
+        atom result=c_func(gpa,{lib,pstr})
+    free(pstr)
+return result
+end function
+
+
 --Raylib Version
 public constant RAYLIB_VERSION_MAJOR = 5
 public constant RAYLIB_VERSION_MINOR = 5
@@ -1743,7 +1753,8 @@ public procedure SetRandomSeed(atom seed)
 end procedure
 
 public function GetRandomValue(atom min,atom max)
-        return c_func(xGetRandomValue,{min,max})
+        return rand_range(min,max)
+--      return c_func(xGetRandomValue,{min,max})
 end function
 --CHECK
 public function LoadRandomSequence(atom count,atom min,atom max)
@@ -2399,8 +2410,40 @@ public constant xDrawPixel = define_c_proc(ray,"+DrawPixel",{C_INT,C_INT,C_Color
                                 xDrawPolyLines = define_c_proc(ray,"+DrawPolyLines",{Vector2,C_INT,C_FLOAT,C_FLOAT,C_Color}),
                                 xDrawPolyLinesEx = define_c_proc(ray,"+DrawPolyLinesEx",{Vector2,C_INT,C_FLOAT,C_FLOAT,C_FLOAT,C_Color})
                                 
-public procedure DrawPixel(atom x,atom y,sequence color)
-        c_proc(xDrawPixel,{x,y,bytes_to_int(color)})
+public procedure _DrawPixel(integer x,integer y,sequence color)
+integer col=bytes_to_int(color)
+--/**/#ilASM{ 
+--/**/  [64]
+--/**/      mov rcx,[x]
+--/**/      mov rdx,[y]
+--/**/      mov r8,[col]
+--/**/      sub rsp, 40                 -- Shadow Space (32) + Alignment (8)
+--/**/      call "libraylib","DrawPixel"         -- Direkter Sprung
+--/**/      add rsp, 40
+--/**/  }
+--/*
+    c_proc(xDrawPixel,{x,y,col})
+--*/
+end procedure
+
+public procedure DrawPixel(integer x,integer  y,sequence color)
+    c_proc(xDrawPixel,{x,y,bytes_to_int(color)})
+end procedure
+
+public procedure _DrawPixelV(sequence pos,sequence color)
+atom reg=V2toReg(pos)
+integer col=bytes_to_int(color)
+--/**/#ilASM{ 
+--/**/  [64]
+--/**/      mov rcx,[reg]    -- funktioniert nicht
+--/**/      mov rdx,[col]
+--/**/      sub rsp, 40                 -- Shadow Space (32) + Alignment (8)
+--/**/      call "libraylib","DrawPixelV"        -- Direkter Sprung
+--/**/      add rsp, 40
+--/**/  }
+--/*
+    c_proc(xDrawPixelV,{reg,col})
+--*/
 end procedure
 
 public procedure DrawPixelV(sequence pos,sequence color)
@@ -2419,8 +2462,15 @@ public procedure DrawLineEx(sequence start,sequence endPos,atom thick,sequence c
         c_proc(xDrawLineEx,{V2toReg(start),V2toReg(endPos),thick,bytes_to_int(color)})
 end procedure
 
-public procedure DrawLineStrip(atom points,atom count,sequence color)
-        c_proc(xDrawLineStrip,{points,count,bytes_to_int(color)})
+public procedure DrawLineStrip(sequence pts,atom count,sequence color)
+atom buffer=allocate(length(pts)*2*8)
+for i= 0 to length(pts)-1
+do
+    poke(buffer+(i*8),atom_to_float32(pts[i+1][1]))
+    poke(buffer+((i*8)+4),atom_to_float32(pts[i+1][2]))
+end for
+        c_proc(xDrawLineStrip,{buffer,count,bytes_to_int(color)})
+free(buffer)
 end procedure
 
 public procedure DrawLineBezier(sequence start,sequence endPos,atom thick,sequence color)
@@ -2444,7 +2494,7 @@ public procedure DrawCircleSectorLines(sequence center,atom radius,atom start,at
 end procedure
 
 public procedure DrawCircleGradient(atom x,atom y,atom radius,sequence inner,sequence outer)
-        c_proc(xDrawCircleGradient,{x,y,radius,V2toReg(inner),V2toReg(outer)})
+        c_proc(xDrawCircleGradient,{x,y,radius,bytes_to_int(inner),bytes_to_int(outer)})
 end procedure
 
 public procedure DrawCircleV(sequence center,atom radius,sequence color)
@@ -2468,11 +2518,11 @@ public procedure DrawEllipseLines(atom x,atom y,atom radH,atom radV,sequence col
 end procedure
 
 public procedure DrawRing(sequence center,atom innerRad,atom outerRad,atom start,atom endAngle,atom segments,sequence color)
-        c_proc(xDrawRing,{center,innerRad,outerRad,start,endAngle,segments,bytes_to_int(color)})
+        c_proc(xDrawRing,{V2toReg(center),innerRad,outerRad,start,endAngle,segments,bytes_to_int(color)})
 end procedure
 
 public procedure DrawRingLines(sequence center,atom innerRad,atom outerRad,atom start,atom endAngle,atom segments,sequence color)
-        c_proc(xDrawRingLines,{center,innerRad,outerRad,start,endAngle,segments,bytes_to_int(color)})
+        c_proc(xDrawRingLines,{V2toReg(center),innerRad,outerRad,start,endAngle,segments,bytes_to_int(color)})
 end procedure
 
 public procedure DrawRectangle(atom x,atom y,atom width,atom height,sequence color)
@@ -2573,12 +2623,26 @@ public procedure DrawTriangleLines(sequence v,sequence v2,sequence v3,sequence c
         c_proc(xDrawTriangleLines,{V2toReg(v),V2toReg(v2),V2toReg(v3),bytes_to_int(color)})
 end procedure
 
-public procedure DrawTriangleFan(atom pts,atom count,sequence color)
-        c_proc(xDrawTriangleFan,{pts,count,color})
+public procedure DrawTriangleFan(sequence  pts,atom count,sequence color)
+atom buffer=allocate(length(pts)*2*8)
+for i= 0 to length(pts)-1
+do
+    poke(buffer+(i*8),atom_to_float32(pts[i+1][1]))
+    poke(buffer+((i*8)+4),atom_to_float32(pts[i+1][2]))
+end for
+        c_proc(xDrawTriangleFan,{buffer,count,bytes_to_int(color)})
+free(buffer)
 end procedure
 
-public procedure DrawTriangleStrip(atom pts,atom count,sequence color)
-        c_proc(xDrawTriangleStrip,{pts,count,bytes_to_int(color)})
+public procedure DrawTriangleStrip(sequence  pts,atom count,sequence color)
+atom buffer=allocate(length(pts)*2*8)
+for i= 0 to length(pts)-1
+do
+    poke(buffer+(i*8),atom_to_float32(pts[i+1][1]))
+    poke(buffer+((i*8)+4),atom_to_float32(pts[i+1][2]))
+end for
+        c_proc(xDrawTriangleStrip,{buffer,count,bytes_to_int(color)})
+free(buffer)
 end procedure
 
 public procedure DrawPoly(sequence center,atom sides,atom radius,atom rotation,sequence color)
@@ -5134,10 +5198,18 @@ free(vec)
 return matrix
 end function
 
-constant xMatrixRotateZYX = define_c_func(ray,"+MatrixRotateZYX",{Vector3},Matrix)
+constant xMatrixRotateZYX = define_c_func(ray,"+MatrixRotateZYX",{C_HPTR,Vector3},Matrix)
 
 global function MatrixRotateZYX(sequence ang)
-        return c_func(xMatrixRotateZYX,{ang})
+atom mat = allocate(size_matrix)
+atom vec=allocate(size_vector3)
+atom ptr
+sequence matrix
+        ptr = c_func(xMatrixRotateZYX,{mat,poke_vector3(vec,ang)})
+matrix=peek_matrix(ptr)
+free(mat)
+free(vec)
+return matrix
 end function
 
 

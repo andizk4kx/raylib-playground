@@ -1,4 +1,0 @@
-install : python -m pip install Nuitka
-Verify using command  :  python -m nuitka --version
-Use it : python -m nuitka hello.py
-         python -m nuitka --follow-imports program.py
