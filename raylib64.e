@@ -129,9 +129,9 @@ global procedure poke_float32(atom addr, atom v)
 end procedure
 
 -- Converts a 64-bit Vector2 result into a sequence
-function RegtoV2(atom in)
+function RegtoV2(atom in_)
 sequence result={0,0}
-sequence x=int_to_bytes(in,8)
+sequence x=int_to_bytes(in_,8)
     result[1]=float32_to_atom(x[1..4])
     result[2]=float32_to_atom(x[5..8])
 return result
@@ -2410,6 +2410,7 @@ public constant xDrawPixel = define_c_proc(ray,"+DrawPixel",{C_INT,C_INT,C_Color
                                 xDrawPolyLines = define_c_proc(ray,"+DrawPolyLines",{Vector2,C_INT,C_FLOAT,C_FLOAT,C_Color}),
                                 xDrawPolyLinesEx = define_c_proc(ray,"+DrawPolyLinesEx",{Vector2,C_INT,C_FLOAT,C_FLOAT,C_FLOAT,C_Color})
                                 
+constant addr=GetProcAddress(ray,"DrawPixel")
 public procedure _DrawPixel(integer x,integer y,sequence color)
 integer col=bytes_to_int(color)
 --/**/#ilASM{ 
@@ -2418,7 +2419,9 @@ integer col=bytes_to_int(color)
 --/**/      mov rdx,[y]
 --/**/      mov r8,[col]
 --/**/      sub rsp, 40                 -- Shadow Space (32) + Alignment (8)
---/**/      call "libraylib","DrawPixel"         -- Direkter Sprung
+--/**/      mov rax,[addr]
+--/**/      call rax
+--/**/  --  call "libraylib","DrawPixel"         -- Direkter Sprung
 --/**/      add rsp, 40
 --/**/  }
 --/*
@@ -2434,13 +2437,14 @@ public procedure _DrawPixelV(sequence pos,sequence color)
 atom reg=V2toReg(pos)
 integer col=bytes_to_int(color)
 --/**/#ilASM{ 
---/**/  [64]
+--/**/  [64]    
 --/**/      mov rcx,[reg]    -- funktioniert nicht
 --/**/      mov rdx,[col]
 --/**/      sub rsp, 40                 -- Shadow Space (32) + Alignment (8)
---/**/      call "libraylib","DrawPixelV"        -- Direkter Sprung
+--/**/  --  call "libraylib","DrawPixelV"        -- Direkter Sprung
 --/**/      add rsp, 40
 --/**/  }
+
 --/*
     c_proc(xDrawPixelV,{reg,col})
 --*/
@@ -3954,7 +3958,7 @@ public constant xTextCopy = define_c_func(ray,"+TextCopy",{C_POINTER,C_STRING},C
                                 
 public function TextCopy(object dst,sequence src)
         --dst=src
-        -- need to wrap this in Eu/Phix
+        -- no need to wrap this in Eu/Phix
         return length(dst)
         --return c_func(xTextCopy,{dst,src})
 end function
