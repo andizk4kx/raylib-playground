@@ -2410,8 +2410,8 @@ public constant xDrawPixel = define_c_proc(ray,"+DrawPixel",{C_INT,C_INT,C_Color
                                 xDrawPolyLines = define_c_proc(ray,"+DrawPolyLines",{Vector2,C_INT,C_FLOAT,C_FLOAT,C_Color}),
                                 xDrawPolyLinesEx = define_c_proc(ray,"+DrawPolyLinesEx",{Vector2,C_INT,C_FLOAT,C_FLOAT,C_FLOAT,C_Color})
                                 
-constant addr=GetProcAddress(ray,"DrawPixel")
-public procedure _DrawPixel(integer x,integer y,sequence color)
+constant DrawPixel_=GetProcAddress(ray,"DrawPixel")
+global procedure _DrawPixel(integer x,integer y,sequence color)
 integer col=bytes_to_int(color)
 --/**/#ilASM{ 
 --/**/  [64]
@@ -2419,7 +2419,7 @@ integer col=bytes_to_int(color)
 --/**/      mov rdx,[y]
 --/**/      mov r8,[col]
 --/**/      sub rsp, 40                 -- Shadow Space (32) + Alignment (8)
---/**/      mov rax,[addr]
+--/**/      mov rax,[DrawPixel_]
 --/**/      call rax
 --/**/  --  call "libraylib","DrawPixel"         -- Direkter Sprung
 --/**/      add rsp, 40
@@ -2433,18 +2433,22 @@ public procedure DrawPixel(integer x,integer  y,sequence color)
     c_proc(xDrawPixel,{x,y,bytes_to_int(color)})
 end procedure
 
-public procedure _DrawPixelV(sequence pos,sequence color)
+constant DrawPixelV_=GetProcAddress(ray,"DrawPixelV")
+global procedure _DrawPixelV(sequence pos,sequence color)
 atom reg=V2toReg(pos)
 integer col=bytes_to_int(color)
 --/**/#ilASM{ 
---/**/  [64]    
---/**/      mov rcx,[reg]    -- funktioniert nicht
+--/**/  [64]
+--/**/      mov rax,[reg]
+--/**/      call :%pLoadMint    
+--/**/      mov rcx,rax  
 --/**/      mov rdx,[col]
 --/**/      sub rsp, 40                 -- Shadow Space (32) + Alignment (8)
+--/**/      mov rax,[DrawPixelV_]
+--/**/      call rax
 --/**/  --  call "libraylib","DrawPixelV"        -- Direkter Sprung
 --/**/      add rsp, 40
 --/**/  }
-
 --/*
     c_proc(xDrawPixelV,{reg,col})
 --*/
