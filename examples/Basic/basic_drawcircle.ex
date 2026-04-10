@@ -48,7 +48,7 @@ include std/math.e
       atom radius = 50 
       sequence color1 = { 255, 25, 25, 255 }    -- red, green, blue, alpha
       sequence color2 = { 25, 25, 255, 255 }    -- red, green, blue, alpha
-      DrawCircleGradient  ( centerX, centerY, radius, color1,color2  )  -- green/blue gradient
+      DrawCircleGradient  ( {centerX, centerY}, radius, color1,color2  )    -- green/blue gradient
     end procedure
 
     -- DrawCircleLines - circle outline

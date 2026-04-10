@@ -88,6 +88,7 @@ global atom ray
 
 ifdef WINDOWS then
         ray = open_dll({"libraylib.dll","../../libraylib.dll","../../bin/libraylib.dll","bin/libraylib.dll","../bin/libraylib.dll"})
+--      ray = open_dll({"libraylib_rl.dll"})
 end ifdef
 
 if ray = 0 then
@@ -1351,7 +1352,9 @@ free(pstr)
 end procedure
 
 public function GetClipboardText()
-        return c_func(xGetClipboardText,{})
+atom pstr
+        pstr= c_func(xGetClipboardText,{})
+        return peek_string(pstr)
 end function
 
 public function GetClipboardImage()
@@ -1793,8 +1796,12 @@ public constant xTraceLog = define_c_proc(ray,"+TraceLog",{C_INT,C_STRING,C_POIN
                                 xMemRealloc = define_c_func(ray,"+MemRealloc",{C_POINTER,C_UINT},C_POINTER),
                                 xMemFree = define_c_proc(ray,"+MemFree",{C_POINTER})
 --CHECK                             
-public procedure TraceLog(atom logLevel,sequence text,object x)
-        c_proc(xTraceLog,{logLevel,text,x})
+public procedure TraceLog(atom logLevel,sequence text,object x=1)
+atom pstr=allocate_string(text)
+atom vargs=allocate(8) -- really do not know hos to handle this
+        c_proc(xTraceLog,{logLevel,pstr,vargs})
+free(pstr)
+free(vargs)
 end procedure
 
 public procedure SetTraceLogLevel(atom logLevel)
@@ -2054,11 +2061,11 @@ public constant xIsKeyPressed = define_c_func(ray,"+IsKeyPressed",{C_INT},C_BOOL
                                 xSetExitKey = define_c_proc(ray,"+SetExitKey",{C_INT})
                                 
 public function IsKeyPressed(atom key)
-        return c_func(xIsKeyPressed,{key})
+        return and_bits(c_func(xIsKeyPressed,{key}),1)
 end function
 
 public function IsKeyPressedRepeat(atom key)
-        return c_func(xIsKeyPressedRepeat,{key})
+        return and_bits(c_func(xIsKeyPressedRepeat,{key}),1)
 end function
 
 public function IsKeyDown(atom key)
@@ -2066,11 +2073,11 @@ public function IsKeyDown(atom key)
 end function
 
 public function IsKeyReleased(atom key)
-        return c_func(xIsKeyReleased,{key})
+        return and_bits(c_func(xIsKeyReleased,{key}),1)
 end function
 
 public function IsKeyUp(atom key)
-        return c_func(xIsKeyUp,{key})
+        return and_bits(c_func(xIsKeyUp,{key}),1)
 end function
 
 public function GetKeyPressed()
@@ -2099,27 +2106,29 @@ public constant xIsGamepadAvailable = define_c_func(ray,"+IsGamepadAvailable",{C
                                 xSetGamepadVibration = define_c_proc(ray,"+SetGamepadVibration",{C_INT,C_FLOAT,C_FLOAT,C_FLOAT})
                                 
 public function IsGamepadAvailable(atom gamepad)
-        return c_func(xIsGamepadAvailable,{gamepad})
+        return and_bits(c_func(xIsGamepadAvailable,{gamepad}),1)
 end function
 
 public function GetGamepadName(atom gamepad)
-        return c_func(xGetGamepadName,{gamepad})
+atom pstr
+        pstr = c_func(xGetGamepadName,{gamepad})
+        return peek_string(pstr)
 end function
 
 public function IsGamepadButtonPressed(atom gamepad,atom button)
-        return c_func(xIsGamepadButtonPressed,{gamepad,button})
+        return and_bits(c_func(xIsGamepadButtonPressed,{gamepad,button}),1)
 end function
 
 public function IsGamepadButtonDown(atom gamepad,atom button)
-        return c_func(xIsGamepadButtonDown,{gamepad,button})
+        return and_bits(c_func(xIsGamepadButtonDown,{gamepad,button}),1)
 end function
 
 public function IsGamepadButtonReleased(atom gamepad,atom button)
-        return c_func(xIsGamepadButtonReleased,{gamepad,button})
+        return and_bits(c_func(xIsGamepadButtonReleased,{gamepad,button}),1)
 end function
 
 public function IsGamepadButtonUp(atom gamepad,atom button)
-        return c_func(xIsGamepadButtonUp,{gamepad,button})
+        return and_bits(c_func(xIsGamepadButtonUp,{gamepad,button}),1)
 end function
 
 public function GetGamepadButtonPressed()
@@ -2169,11 +2178,11 @@ public function IsMouseButtonDown(atom button)
 end function
 
 public function IsMouseButtonReleased(atom button)
-        return c_func(xIsMouseButtonReleased,{button})
+        return and_bits(c_func(xIsMouseButtonReleased,{button}),1)
 end function
 
 public function IsMouseButtonUp(atom button)
-        return c_func(xIsMouseButtonUp,{button})
+        return and_bits(c_func(xIsMouseButtonUp,{button}),1)
 end function
 
 public function GetMouseX()
@@ -2382,7 +2391,7 @@ public constant xDrawPixel = define_c_proc(ray,"+DrawPixel",{C_INT,C_INT,C_Color
                                 xDrawCircle = define_c_proc(ray,"+DrawCircle",{C_INT,C_INT,C_FLOAT,C_Color}),
                                 xDrawCircleSector = define_c_proc(ray,"+DrawCircleSector",{Vector2,C_FLOAT,C_FLOAT,C_FLOAT,C_INT,C_Color}),
                                 xDrawCircleSectorLines = define_c_proc(ray,"+DrawCircleSectorLines",{Vector2,C_FLOAT,C_FLOAT,C_FLOAT,C_INT,C_Color}),
-                                xDrawCircleGradient = define_c_proc(ray,"+DrawCircleGradient",{C_INT,C_INT,C_FLOAT,C_Color,C_Color}),
+                                xDrawCircleGradient = define_c_proc(ray,"+DrawCircleGradient",{Vector2,C_FLOAT,C_Color,C_Color}),
                                 xDrawCircleV = define_c_proc(ray,"+DrawCircleV",{Vector2,C_FLOAT,C_Color}),
                                 xDrawCircleLines = define_c_proc(ray,"+DrawCircleLines",{C_INT,C_INT,C_FLOAT,C_Color}),
                                 xDrawCircleLinesV = define_c_proc(ray,"+DrawCircleLinesV",{Vector2,C_FLOAT,C_Color}),
@@ -2501,8 +2510,8 @@ public procedure DrawCircleSectorLines(sequence center,atom radius,atom start,at
         c_proc(xDrawCircleSectorLines,{V2toReg(center),radius,start,endAngle,segments,bytes_to_int(color)})
 end procedure
 
-public procedure DrawCircleGradient(atom x,atom y,atom radius,sequence inner,sequence outer)
-        c_proc(xDrawCircleGradient,{x,y,radius,bytes_to_int(inner),bytes_to_int(outer)})
+public procedure DrawCircleGradient(sequence center,atom radius,sequence inner,sequence outer)
+        c_proc(xDrawCircleGradient,{V2toReg(center),radius,bytes_to_int(inner),bytes_to_int(outer)})
 end procedure
 
 public procedure DrawCircleV(sequence center,atom radius,sequence color)
@@ -4273,8 +4282,8 @@ public constant xDrawModel = define_c_proc(ray,"+DrawModel",{Model,Vector3,C_FLO
                                 xDrawModelEx = define_c_proc(ray,"+DrawModelEx",{Model,Vector3,Vector3,C_FLOAT,Vector3,C_Color}),
                                 xDrawModelWires = define_c_proc(ray,"+DrawModelWires",{Model,Vector3,C_FLOAT,C_Color}),
                                 xDrawModelWiresEx = define_c_proc(ray,"+DrawModelWiresEx",{Model,Vector3,Vector3,C_FLOAT,Vector3,C_Color}),
-                                xDrawModelPoints = define_c_proc(ray,"+DrawModelPoints",{Model,Vector3,C_FLOAT,C_Color}),
-                                xDrawModelPointsEx = define_c_proc(ray,"+DrawModelPointsEx",{Model,Vector3,Vector3,C_FLOAT,Vector3,C_Color}),
+                            --  xDrawModelPoints = define_c_proc(ray,"+DrawModelPoints",{Model,Vector3,C_FLOAT,C_Color}),
+                            --  xDrawModelPointsEx = define_c_proc(ray,"+DrawModelPointsEx",{Model,Vector3,Vector3,C_FLOAT,Vector3,C_Color}),
                                 xDrawBoundingBox = define_c_proc(ray,"+DrawBoundingBox",{BoundingBox,C_Color}),
                                 xDrawBillboard = define_c_proc(ray,"+DrawBillboard",{Camera,Texture2D,Vector3,C_FLOAT,C_Color}),
                                 xDrawBillboardRec = define_c_proc(ray,"+DrawBillboardRec",{Camera,Texture2D,Rectangle,Vector3,Vector2,C_Color}),
@@ -4300,13 +4309,14 @@ public procedure DrawModelWiresEx(sequence model,sequence pos,sequence rotAxis,a
         c_proc(xDrawModelWiresEx,{model,pos,rotAxis,rotAng,scale,tint})
 end procedure
 
-public procedure DrawModelPoints(sequence model,sequence pos,atom scale,sequence tint)
-        c_proc(xDrawModelPoints,{model,pos,scale,tint})
-end procedure
+--CHECK removed 6.0
+--public procedure DrawModelPoints(sequence model,sequence pos,atom scale,sequence tint)
+--      c_proc(xDrawModelPoints,{model,pos,scale,tint})
+--end procedure
 
-public procedure DrawModelPointsEx(sequence model,sequence pos,sequence rotAxis,atom rotAng,sequence scale,sequence tint)
-        c_proc(xDrawModelPointsEx,{model,pos,rotAxis,rotAng,scale,tint})
-end procedure
+--public procedure DrawModelPointsEx(sequence model,sequence pos,sequence rotAxis,atom rotAng,sequence scale,sequence tint)
+--      c_proc(xDrawModelPointsEx,{model,pos,rotAxis,rotAng,scale,tint})
+--end procedure
 
 public procedure DrawBoundingBox(sequence box,sequence col)
 atom box1=allocate(size_boundingbox)
@@ -4982,10 +4992,37 @@ global function Vector2Zero()
     return {0,0}
 end function
 
-constant xVector2Normalize = define_c_func(ray,"+Vector2Normalize",{Vector2},Vector2)
 
+-- Calculate two vectors dot product
+global function Vector2DotProduct(sequence v,sequence v2)
+        return (v[1]*v2[1])+(v[2]*v2[2])
+end function
+
+constant xVector2LengthSqr = define_c_func(ray,"+Vector2LengthSqr",{Vector2},C_FLOAT)
+
+global function Vector2LengthSqr(sequence v)
+        return c_func(xVector2LengthSqr,{V2toReg(v)})
+end function
+
+
+-- Subtract two vectors (v1 - v2)
+global function Vector2Subtract(sequence v,sequence v2)
+        return {v[1]-v2[1],v[2]-v2[2]} 
+end function
+
+
+-- Normalize provided vector
 global function Vector2Normalize(sequence v)
-        return RegtoV2(c_func(xVector2Normalize,{V2toReg(v)}))
+sequence result={0,0}
+atom _length = sqrt((v[1]*v[1]) + (v[2]*v[2]))
+atom ilength
+if (_length>0)
+then
+    ilength=1/_length
+    result[1] = v[1]*ilength
+    result[2] = v[2]*ilength
+end if
+return result
 end function
 
 constant xVector2Angle = define_c_func(ray,"+Vector2Angle",{Vector2,Vector2},C_FLOAT)
@@ -5006,8 +5043,10 @@ end function
 
 constant xVector2Distance = define_c_func(ray,"+Vector2Distance",{Vector2,Vector2},C_FLOAT)
 
-global function Vector2Distance(sequence v,sequence v2)
-         return c_func(xVector2Distance,{V2toReg(v),V2toReg(v2)})
+global function Vector2Distance(sequence v1,sequence v2)
+--float result = sqrtf((v1.x - v2.x)*(v1.x - v2.x) + (v1.y - v2.y)*(v1.y - v2.y));
+    return sqrt((v1[1]-v2[1])*(v1[1]-v2[1])+(v1[2]-v2[2])*(v1[2]-v2[2]))
+--       return c_func(xVector2Distance,{V2toReg(v),V2toReg(v2)})
 end function
 
 constant xVector2Scale = define_c_func(ray,"+Vector2Scale",{Vector2,C_FLOAT},Vector2)
@@ -5221,10 +5260,19 @@ return matrix
 end function
 
 
-export constant xClamp = define_c_func(ray,"+Clamp",{C_FLOAT,C_FLOAT,C_FLOAT},C_FLOAT)
+constant xClamp = define_c_func(ray,"+Clamp",{C_FLOAT,C_FLOAT,C_FLOAT},C_FLOAT)
 
-public function Clamp(atom val,atom min,atom max)
-        return c_func(xClamp,{val,min,max})
+global function Clamp(atom val,atom _min,atom _max)
+atom result
+if val<_min 
+then
+    result=_min
+else
+    result=val  
+end if
+if result > _max then result =_max end if
+return result
+--      return c_func(xClamp,{val,min,max})
 end function
 
 export constant xLerp = define_c_func(ray,"+Lerp",{C_FLOAT,C_FLOAT,C_FLOAT},C_FLOAT)
