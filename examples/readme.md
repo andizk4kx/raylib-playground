@@ -30,6 +30,9 @@ Examples using raylib [core](../src/rcore.c) module platform functionality: wind
 | [core_window_flags](core/core_window_flags.ex) | <img src="core/core_window_flags.png" alt="core_window_flags" width="80"> | ⭐⭐⭐☆ | 3.5 | 3.5 | [Ramon Santamaria](https://github.com/raysan5) |
 | [core_render_texture](core/core_render_texture.ex) | <img src="core/core_render_texture.png" alt="core_render_texture" width="80"> | ⭐☆☆☆ | 5.6-dev | 5.6-dev | [Ramon Santamaria](https://github.com/raysan5) |
 | [core_basic_screen_manager](core/core_basic_screen_manager.ex) | <img src="core/core_basic_screen_manager.png" alt="core_basic_screen_manager" width="80"> | ⭐☆☆☆ | 4.0 | 4.0 | [Ramon Santamaria](https://github.com/raysan5) |
+|[core_input_gamepad](core/core_input_gamepad.ex) | <img src="core/core_input_gamepad.png" alt="core_input_gamepad" width="80"> | ⭐☆☆☆ | 1.1 | 4.2 | [Ramon Santamaria](https://github.com/raysan5) |
+| [core_scissor_test](core/core_scissor_test.ex) | <img src="core/core_scissor_test.png" alt="core_scissor_test" width="80"> | ⭐☆☆☆ | 2.5 | 3.0 | [Chris Dill](https://github.com/MysteriousSpace) |
+| [core_world_screen](core/core_world_screen.ex) | <img src="core/core_world_screen.png" alt="core_world_screen" width="80"> | ⭐⭐☆☆ | 1.3 | 1.4 | [Ramon Santamaria](https://github.com/raysan5) |
 ### category: shapes [xx]
 
 Examples using raylib shapes drawing functionality, provided by raylib [shapes](../src/rshapes.c) module.
