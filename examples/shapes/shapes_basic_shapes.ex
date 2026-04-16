@@ -61,8 +61,10 @@ sequence v7= { screenWidth/4.0*3, 330 }
 
             -- Circle shapes and lines
             DrawCircle(screenWidth/5, 120, 35, DARKBLUE)
-            DrawCircleGradient(screenWidth/5, 220, 60, GREEN, SKYBLUE)
+            DrawCircleGradient({screenWidth/5, 220}, 60, GREEN, SKYBLUE)
             DrawCircleLines(screenWidth/5, 340, 80, DARKBLUE)
+            DrawEllipse(screenWidth/5, 120, 25, 20, YELLOW)
+            DrawEllipseLines(screenWidth/5, 120, 30, 25, YELLOW)
 
             -- Rectangle shapes and lines
             DrawRectangle(screenWidth/4*2 - 60, 100, 120, 60, RED)

@@ -87,7 +87,7 @@ constant Vector2=C_INT64,
 global atom ray 
 
 ifdef WINDOWS then
-        ray = open_dll({"libraylib.dll","../../libraylib.dll","../../bin/libraylib.dll","bin/libraylib.dll","../bin/libraylib.dll"})
+        ray = open_dll({"libraylib.dll","../libraylib.dll","../../libraylib.dll","../../bin/libraylib.dll","bin/libraylib.dll","../bin/libraylib.dll"})
 --      ray = open_dll({"libraylib_rl.dll"})
 end ifdef
 
@@ -666,6 +666,19 @@ else
     ids=append(ids,{idval[1],allocate(8)})
     addr=get_addr_(idval[1])
     poke4(addr,idval[2])  -- for setting a start value
+end if
+return addr
+end function
+
+global function get_addr_string(sequence idval) -- aet the buffer to 1024
+atom addr=get_addr_(idval[1])
+atom dummy
+if (addr>0) then
+    dummy=poke_string(addr,1024,idval[2])
+else
+    ids=append(ids,{idval[1],allocate(1024)})
+    addr=get_addr_(idval[1])
+    dummy=poke_string(addr,1024,idval[2])  -- for setting a start value
 end if
 return addr
 end function
@@ -1346,8 +1359,11 @@ global function GetMonitorName(atom monitor)
 end function
 
 global procedure SetClipboardText(sequence text)
+--if not length(text) then
+--  return
+--end if
 atom pstr = allocate_string(text)
-        c_proc(xSetClipboardText,{text})
+        c_proc(xSetClipboardText,{pstr})
 free(pstr)
 end procedure
 
@@ -2430,7 +2446,7 @@ constant xDrawPixel = define_c_proc(ray,"+DrawPixel",{C_INT,C_INT,C_Color}),
                                 xDrawPolyLinesEx = define_c_proc(ray,"+DrawPolyLinesEx",{Vector2,C_INT,C_FLOAT,C_FLOAT,C_FLOAT,C_Color})
                                 
 constant DrawPixel_=GetProcAddress(ray,"DrawPixel")
-global procedure _DrawPixel(integer x,integer y,sequence color)
+global procedure DrawPixel(integer x,integer y,sequence color)
 integer col=bytes_to_int(color)
 --/**/#ilASM{ 
 --/**/  [64]
@@ -2448,12 +2464,14 @@ integer col=bytes_to_int(color)
 --*/
 end procedure
 
-global procedure DrawPixel(integer x,integer  y,sequence color)
+global procedure _DrawPixel(integer x,integer  y,sequence color)
     c_proc(xDrawPixel,{x,y,bytes_to_int(color)})
 end procedure
 
+
+
 constant DrawPixelV_=GetProcAddress(ray,"DrawPixelV")
-global procedure _DrawPixelV(sequence pos,sequence color)
+global procedure DrawPixelV(sequence pos,sequence color)
 atom reg=V2toReg(pos)
 integer col=bytes_to_int(color)
 --/**/#ilASM{ 
@@ -2461,9 +2479,10 @@ integer col=bytes_to_int(color)
 --/**/      mov rax,[reg]
 --/**/      call :%pLoadMint    
 --/**/      mov rcx,rax  
+--/**/      mov rax,[DrawPixelV_]
 --/**/      mov rdx,[col]
 --/**/      sub rsp, 40                 -- Shadow Space (32) + Alignment (8)
---/**/      mov rax,[DrawPixelV_]
+--/**/  --  mov rax,[DrawPixelV_]
 --/**/      call rax
 --/**/  --  call "libraylib","DrawPixelV"        -- Direkter Sprung
 --/**/      add rsp, 40
@@ -2473,7 +2492,9 @@ integer col=bytes_to_int(color)
 --*/
 end procedure
 
-global procedure DrawPixelV(sequence pos,sequence color)
+
+
+global procedure _DrawPixelV(sequence pos,sequence color)
         c_proc(xDrawPixelV,{V2toReg(pos),bytes_to_int(color)})
 end procedure
 
@@ -4208,7 +4229,7 @@ end procedure
 
 public procedure DrawCylinderWires(sequence pos,atom radtop,atom radbot,atom height,atom slices,sequence col)
 atom v1=allocate(size_vector3)
-        c_proc(xDrawCylinderWires,{poke_vector3(v1,pos),radtop,radbot,height,slices,col})
+        c_proc(xDrawCylinderWires,{poke_vector3(v1,pos),radtop,radbot,height,slices,bytes_to_int(col)})
 free(v1)
 end procedure
 
@@ -5420,11 +5441,36 @@ global enum BORDER_COLOR_NORMAL = 0,
         TEXT_PADDING,
         TEXT_ALIGNMENT
 
+global enum TEXT_SIZE = 16,
+        TEXT_SPACING,
+        LINE_COLOR,
+        BACKGROUND_COLOR,
+        TEXT_LINE_SPACING,
+        TEXT_ALIGNMENT_VERTICAL,
+        TEXT_WRAP_MODE
+
+global enum STATE_NORMAL = 0,
+            STATE_FOCUSED,
+            STATE_PRESSED,
+            STATE_DISABLED
+
+global enum TEXT_READONLY = 16
 
 
 
 constant xGuiEnable = define_c_proc(ray,"+GuiEnable",{}),
-         xGuiDisable = define_c_proc(ray,"+GuiDisable",{})
+         xGuiDisable = define_c_proc(ray,"+GuiDisable",{}),
+         xGuiSetIconScale = define_c_proc(ray,"+GuiSetIconScale",{C_INT}),
+         xGuiSetState = define_c_proc(ray,"+GuiSetState",{C_INT})
+        
+global procedure GuiSetState(atom state)
+        c_proc(xGuiSetState,{state})
+end procedure
+
+global procedure GuiSetIconScale(atom scale)
+        c_proc(xGuiSetIconScale,{scale})
+end procedure
+
 global procedure GuiEnable()
         c_proc(xGuiEnable,{})
 end procedure
@@ -5444,7 +5490,7 @@ public function GuiGetStyle(atom control,atom property)
         return c_func(xGuiGetStyle,{control,property})
 end function
 
-global constant xGuiLabel = define_c_func(ray,"+GuiLabel",{Rectangle,C_STRING},C_INT),
+constant xGuiLabel = define_c_func(ray,"+GuiLabel",{Rectangle,C_STRING},C_INT),
                                 xGuiButton = define_c_func(ray,"+GuiButton",{Rectangle,C_STRING},C_INT),
                                 xGuiLabelButton = define_c_func(ray,"+GuiLabelButton",{Rectangle,C_STRING},C_INT),
                                 xGuiToggle = define_c_func(ray,"+GuiToggle",{Rectangle,C_STRING,C_POINTER},C_INT),
@@ -5560,14 +5606,14 @@ free(memrect)
 return result
 end function
 
-public function GuiTextBox(sequence bounds,sequence text,atom size,atom editMode)
+public function GuiTextBox(sequence bounds,sequence idval,atom size,atom editMode)
 atom memrect=allocate(size_rectangle)
-atom pstr=allocate_string(text)
+atom addr=get_addr_string(idval)
 atom result
-        result = c_func(xGuiTextBox,{poke_rectangle(memrect,bounds),pstr,size,editMode})
-free(pstr)      
+        result = c_func(xGuiTextBox,{poke_rectangle(memrect,bounds),addr,size,editMode})
+        --?result   
 free(memrect)
-return result
+return peek_string(addr)
 end function
 
 

@@ -33,6 +33,7 @@ Examples using raylib [core](../src/rcore.c) module platform functionality: wind
 |[core_input_gamepad](core/core_input_gamepad.ex) | <img src="core/core_input_gamepad.png" alt="core_input_gamepad" width="80"> | ⭐☆☆☆ | 1.1 | 4.2 | [Ramon Santamaria](https://github.com/raysan5) |
 | [core_scissor_test](core/core_scissor_test.ex) | <img src="core/core_scissor_test.png" alt="core_scissor_test" width="80"> | ⭐☆☆☆ | 2.5 | 3.0 | [Chris Dill](https://github.com/MysteriousSpace) |
 | [core_world_screen](core/core_world_screen.ex) | <img src="core/core_world_screen.png" alt="core_world_screen" width="80"> | ⭐⭐☆☆ | 1.3 | 1.4 | [Ramon Santamaria](https://github.com/raysan5) |
+| [core_clipboard_text](core/core_clipboard_text.ex) | <img src="core/core_clipboard_text.png" alt="core_clipboard_text" width="80"> | ⭐⭐☆☆ | 6.0 | 6.0 | [Ananth S](https://github.com/Ananth1839) |
 ### category: shapes [xx]
 
 Examples using raylib shapes drawing functionality, provided by raylib [shapes](../src/rshapes.c) module.
@@ -79,7 +80,8 @@ Examples using raylib models functionality, including models loading/generation 
 [models_billboard_rendering](models/models_billboard_rendering.ex) | <img src="models/models_billboard_rendering.png" alt="models_billboard_rendering" width="80"> | ⭐⭐⭐☆ | 1.3 | 3.5 | [Ramon Santamaria](https://github.com/raysan5) |
 |[models_directional_billboard](models/models_directional_billboard.ex) | <img src="models/models_directional_billboard.png" alt="models_directional_billboard" width="80"> | ⭐⭐☆☆ | 5.6-dev | 5.6 | [Robin](https://github.com/RobinsAviary) |
 |[models_box_collisions](models/models_box_collisions.ex) | <img src="models/models_box_collisions.png" alt="models_box_collisions" width="80"> | ⭐☆☆☆ | 1.3 | 3.5 | [Ramon Santamaria](https://github.com/raysan5) |
-| [models_yaw_pitch_roll](models/models_yaw_pitch_roll.ex) | <img src="models/models_yaw_pitch_roll.png" alt="models_yaw_pitch_roll" width="80"> | ⭐⭐☆☆ | 1.8 | 4.0 | [Berni](https://github.com/Berni8k) |
+|[models_yaw_pitch_roll](models/models_yaw_pitch_roll.ex) | <img src="models/models_yaw_pitch_roll.png" alt="models_yaw_pitch_roll" width="80"> | ⭐⭐☆☆ | 1.8 | 4.0 | [Berni](https://github.com/Berni8k) |
+|[models_geometric_shapes](models/models_geometric_shapes.ex) | <img src="models/models_geometric_shapes.png" alt="models_geometric_shapes" width="80"> | ⭐☆☆☆ | 1.0 | 3.5 | [Ramon Santamaria](https://github.com/raysan5) |
 ### category: audio [xx]
 
 Examples using raylib audio functionality, including sound/music loading and playing. This functionality is provided by raylib [raudio](../src/raudio.c) module. Note this module can be used standalone independently of raylib.
