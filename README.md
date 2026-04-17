@@ -9,4 +9,4 @@ You may also visit this small raylib introductory course developing a simple gam
 
 This wrapper (binding) is largely based on the work of Icy\_Viking (https://github.com/gAndy50/EuRayLib5)
 
-![Image from examples](https://github.com/andizk4kx/raylib-playground/blob/main/examples/shaders/shaders_color_correction.png)
+![Image from examples](https://github.com/andizk4kx/raylib-playground/blob/main/examples/models/models_cubicmap_rendering.png)
