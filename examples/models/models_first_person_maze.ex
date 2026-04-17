@@ -36,8 +36,11 @@ include "..\\..\\raylib64.e"
     camera[up] = { 0.0, 1.0, 0.0 }          -- Camera up vector (rotation towards target)
     camera[fovy] = 45.0                                 -- Camera field-of-view Y
     camera[projection] = CAMERA_PERSPECTIVE             -- Camera projection type
-
-    sequence imMap = LoadImage("resources/cubicmap.png")        -- Load cubicmap image (RAM)
+    sequence fname="resources/cubicmap.png"
+    ifdef PHIX then
+        fname="resources/cubicmap_phix.png"
+    end ifdef
+    sequence imMap = LoadImage(fname)       -- Load cubicmap image (RAM)
     sequence cubicmap = LoadTextureFromImage(imMap)         -- Convert image to texture to display (VRAM)
     sequence mesh = GenMeshCubicmap(imMap,{ 1.0, 1.0, 1.0 }) 
     sequence model = LoadModelFromMesh(mesh) 
