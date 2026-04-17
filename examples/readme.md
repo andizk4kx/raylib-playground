@@ -82,6 +82,10 @@ Examples using raylib models functionality, including models loading/generation 
 |[models_box_collisions](models/models_box_collisions.ex) | <img src="models/models_box_collisions.png" alt="models_box_collisions" width="80"> | ⭐☆☆☆ | 1.3 | 3.5 | [Ramon Santamaria](https://github.com/raysan5) |
 |[models_yaw_pitch_roll](models/models_yaw_pitch_roll.ex) | <img src="models/models_yaw_pitch_roll.png" alt="models_yaw_pitch_roll" width="80"> | ⭐⭐☆☆ | 1.8 | 4.0 | [Berni](https://github.com/Berni8k) |
 |[models_geometric_shapes](models/models_geometric_shapes.ex) | <img src="models/models_geometric_shapes.png" alt="models_geometric_shapes" width="80"> | ⭐☆☆☆ | 1.0 | 3.5 | [Ramon Santamaria](https://github.com/raysan5) |
+|[models_waving_cubes](models/models_waving_cubes.ex) | <img src="models/models_waving_cubes.png" alt="models_waving_cubes" width="80"> | ⭐⭐⭐☆ | 2.5 | 3.7 | [Codecat](https://github.com/codecat) |
+|[models_cubicmap_rendering](models/models_cubicmap_rendering.ex) | <img src="models/models_cubicmap_rendering.png" alt="models_cubicmap_rendering" width="80"> | ⭐⭐☆☆ | 1.8 | 3.5 | [Ramon Santamaria](https://github.com/raysan5) |
+|[models_first_person_maze](models/models_first_person_maze.ex) | <img src="models/models_first_person_maze.png" alt="models_first_person_maze" width="80"> | ⭐⭐☆☆ | 2.5 | 3.5 | [Ramon Santamaria](https://github.com/raysan5) |
+|[models_mesh_generation](models/models_mesh_generation.ex) | <img src="models/models_mesh_generation.png" alt="models_mesh_generation" width="80"> | ⭐⭐☆☆ | 1.8 | 4.0 | [Ramon Santamaria](https://github.com/raysan5) |
 ### category: audio [xx]
 
 Examples using raylib audio functionality, including sound/music loading and playing. This functionality is provided by raylib [raudio](../src/raudio.c) module. Note this module can be used standalone independently of raylib.

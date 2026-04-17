@@ -112,7 +112,7 @@ constant MAX_TEXT_SAMPLES = 5
                 inputBuffer = {}  -- Quick solution to clear text
             end if
 
-            if (IsKeyPressed(KEY_C)) then SetClipboardText(inputBuffer) end  if 
+            if (IsKeyPressed(KEY_C)) then SetClipboardText(inputBuffer) clipboardText = GetClipboardText() end  if 
 
             if (IsKeyPressed(KEY_V))
             then
