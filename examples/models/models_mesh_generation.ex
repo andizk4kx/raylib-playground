@@ -96,7 +96,7 @@ constant NUM_MODELS=9               -- Parametric 3d shapes to generate
         elsif (IsKeyPressed(KEY_LEFT))
         then
             currentModel -= 1
-            if (currentModel < 1) then currentModel = NUM_MODELS+1  end if
+            if (currentModel < 1) then currentModel = NUM_MODELS    end if
         end if
         ------------------------------------------------------------------------------------
 
