@@ -4622,7 +4622,16 @@ return mesh
 end function
 
 public function GenMeshHeightmap(sequence heightmap,sequence size)
-        return c_func(xGenMeshHeightmap,{heightmap,size})
+atom pimg=allocate(size_image)
+atom vec=allocate(size_vector3)
+atom mem=allocate(size_mesh)
+atom result
+        result = c_func(xGenMeshHeightmap,{mem,poke_image(pimg,heightmap),poke_vector3(vec,size)})
+sequence mesh=peek_mesh(result)
+free(pimg)
+free(mem)
+free(vec)
+return mesh
 end function
 
 public function GenMeshCubicmap(sequence cubicmap,sequence size)

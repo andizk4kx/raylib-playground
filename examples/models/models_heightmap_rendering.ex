@@ -1,0 +1,94 @@
+/*******************************************************************************************
+*
+*   raylib [models] example - heightmap rendering
+*
+*   Example complexity rating: [★☆☆☆] 1/4
+*
+*   Example originally created with raylib 1.8, last time updated with raylib 3.5
+*
+*   Example licensed under an unmodified zlib/libpng license, which is an OSI-certified,
+*   BSD-like license that allows static linking with closed source software
+*
+*   Copyright (c) 2015-2025 Ramon Santamaria (@raysan5)
+*
+********************************************************************************************/
+--adapted to Phix/Euphoria 2026 Andreas Wagner
+include "..\\..\\raylib64.e"
+
+--------------------------------------------------------------------------------------
+-- Program main entry point
+--------------------------------------------------------------------------------------
+
+    -- Initialization
+    ----------------------------------------------------------------------------------------
+    constant screenWidth = 800
+    constant screenHeight = 450
+    enum _position,target,up,fovy,projection
+    enum width=2,height
+
+    InitWindow(screenWidth, screenHeight, "raylib [models] example - heightmap rendering")
+
+    -- Define our custom camera to look into our 3d world
+    sequence camera = Tcamera3D 
+    camera[_position] = { 18.0, 21.0, 18.0 }    -- Camera position
+    camera[target] = { 0.0, 0.0, 0.0 }          -- Camera looking at point
+    camera[up] = { 0.0, 1.0, 0.0 }              -- Camera up vector (rotation towards target)
+    camera[fovy] = 45.0                                     -- Camera field-of-view Y
+    camera[projection] = CAMERA_PERSPECTIVE                 -- Camera projection type
+
+    sequence image = LoadImage("resources/heightmap.png")   -- Load heightmap image (RAM)
+    sequence texture = LoadTextureFromImage(image)      -- Convert image to texture (VRAM)
+
+    sequence mesh = GenMeshHeightmap(image, { 16, 8, 16 })  -- Generate heightmap mesh (RAM and VRAM)
+    sequence model = LoadModelFromMesh(mesh)                    -- Load model from generated mesh
+
+    --model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture  -- Set map diffuse texture
+    model[mod_materials][1][mod_materialmaps][MATERIAL_MAP_DIFFUSE+1][matmap_texture] = texture
+    
+    sequence mapPosition = { -8.0, 0.0, -8.0 }          -- Define model position
+
+    UnloadImage(image)              -- Unload heightmap image from RAM, already uploaded to VRAM
+
+    SetTargetFPS(60)                -- Set our game to run at 60 frames-per-second
+    ----------------------------------------------------------------------------------------
+
+    -- Main game loop
+    while not(WindowShouldClose())  -- Detect window close button or ESC key
+    do
+        -- Update
+        ------------------------------------------------------------------------------------
+        camera=UpdateCamera(camera, CAMERA_ORBITAL) 
+        ------------------------------------------------------------------------------------
+
+        -- Draw
+        ------------------------------------------------------------------------------------
+        BeginDrawing() 
+
+            ClearBackground(RAYWHITE) 
+
+            BeginMode3D(camera) 
+
+                DrawModel(model, mapPosition, 1.0, BLUE) 
+
+                DrawGrid(30, 1.0) 
+
+            EndMode3D() 
+
+            DrawTexture(texture, screenWidth - texture[width] - 20, 20, WHITE) 
+            DrawRectangleLines(screenWidth - texture[width] - 20, 20, texture[width], texture[height], GREEN) 
+
+            DrawFPS(10, 10) 
+
+        EndDrawing() 
+        ------------------------------------------------------------------------------------
+    end while
+
+    -- De-Initialization
+    ----------------------------------------------------------------------------------------
+    UnloadTexture(texture)      -- Unload texture
+    UnloadModel(model)          -- Unload model
+
+    CloseWindow()               -- Close window and OpenGL context
+    ----------------------------------------------------------------------------------------
+
+
