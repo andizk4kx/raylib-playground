@@ -59,6 +59,7 @@ Examples using raylib shapes drawing functionality, provided by raylib [shapes](
 | [shapes_ball_physics](shapes/shapes_ball_physics.ex) | <img src="shapes/shapes_ball_physics.png" alt="shapes_ball_physics" width="80"> | ⭐⭐☆☆ | 5.6-dev | 5.6-dev | [David Buzatto](https://github.com/davidbuzatto) |
 | [shapes_triangle_strip](shapes/shapes_triangle_strip.ex) | <img src="shapes/shapes_triangle_strip.png" alt="shapes_triangle_strip" width="80"> | ⭐⭐☆☆ | 5.6-dev | 5.6-dev | [Jopestpe](https://github.com/jopestpe) |
 | [shapes_lines_drawing](shapes/shapes_lines_drawing.ex) | <img src="shapes/shapes_lines_drawing.png" alt="shapes_lines_drawing" width="80"> | ⭐☆☆☆ | 5.6-dev | 5.6 | [Robin](https://github.com/RobinsAviary) |
+| [shapes_bullet_hell](shapes/shapes_bullet_hell.ex) | <img src="shapes/shapes_bullet_hell.png" alt="shapes_bullet_hell" width="80"> | ⭐☆☆☆ | 5.6 | 5.6 | [Zero](https://github.com/zerohorsepower) |
 ## category: textures [xx]
 
 Examples using raylib textures functionality, including image/textures loading/generation and drawing, provided by raylib [textures](../src/rtextures.c) module.
@@ -87,6 +88,7 @@ Examples using raylib models functionality, including models loading/generation 
 |[models_first_person_maze](models/models_first_person_maze.ex) | <img src="models/models_first_person_maze.png" alt="models_first_person_maze" width="80"> | ⭐⭐☆☆ | 2.5 | 3.5 | [Ramon Santamaria](https://github.com/raysan5) |
 |[models_mesh_generation](models/models_mesh_generation.ex) | <img src="models/models_mesh_generation.png" alt="models_mesh_generation" width="80"> | ⭐⭐☆☆ | 1.8 | 4.0 | [Ramon Santamaria](https://github.com/raysan5) |
 |[models_heightmap_rendering](models/models_heightmap_rendering.ex) | <img src="models/models_heightmap_rendering.png" alt="models_heightmap_rendering" width="80"> | ⭐☆☆☆ | 1.8 | 3.5 | [Ramon Santamaria](https://github.com/raysan5) |
+|[models_rotating_cube](models/models_rotating_cube.ex) | <img src="models/models_rotating_cube.png" alt="models_rotating_cube" width="80"> | ⭐☆☆☆ | 6.0 | 6.0 | [Jopestpe](https://github.com/jopestpe) |
 ### category: audio [xx]
 
 Examples using raylib audio functionality, including sound/music loading and playing. This functionality is provided by raylib [raudio](../src/raudio.c) module. Note this module can be used standalone independently of raylib.

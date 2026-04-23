@@ -2462,6 +2462,14 @@ free(camera)
 return camret
 end function
 
+global function CameraRoll(sequence cam,atom angle)
+atom camera=allocate(size_camera3d)
+sequence camret=Tcamera3D
+camret=peek_camera3d(camera)
+            c_proc(xCameraRoll,{poke_camera3d(camera,cam),angle})   
+free(camera)
+return camret
+end function
 
 --Shape functions
 constant xSetShapesTexture = define_c_proc(ray,"+SetShapesTexture",{Texture2D,Rectangle}),
@@ -3211,7 +3219,7 @@ end function
 
 --Image manipulation functions
 constant xImageCopy = define_c_func(ray,"+ImageCopy",{Image},Image),
-                                xImageFromImage = define_c_func(ray,"+ImageFromImage",{Image,Rectangle},Image),
+                                xImageFromImage = define_c_func(ray,"+ImageFromImage",{C_HPTR,Image,Rectangle},Image),
                                 xImageFromChannel = define_c_func(ray,"+ImageFromChannel",{Image,C_INT},Image),
                                 xImageText = define_c_func(ray,"+ImageText",{C_STRING,C_INT,C_Color},Image),
                                 xImageTextEx = define_c_func(ray,"+ImageTextEx",{Font,C_STRING,C_FLOAT,C_FLOAT,C_Color},Image),
@@ -3252,7 +3260,15 @@ global function ImageCopy(sequence image)
 end function
 
 global function ImageFromImage(sequence image,sequence rec)
-        return c_func(xImageFromImage,{image,rec})
+atom mem=allocate(size_image)
+atom rect=allocate(size_rectangle)
+atom ptr
+sequence result
+        ptr = c_func(xImageFromImage,{mem,poke_image(mem,image),poke_rectangle(rect,rec)})
+        result=peek_image(ptr)
+free(rect)
+free(mem)
+return (result)
 end function
 
 global function ImageFromChannel(sequence image,atom selectChannel)
@@ -4434,7 +4450,15 @@ free(vec1)
 end procedure
 
 public procedure DrawModelEx(sequence model,sequence pos,sequence rotAxis,atom rotAng,sequence scale,sequence tint)
-        c_proc(xDrawModelEx,{model,pos,rotAxis,rotAng,scale,tint})
+atom modl=allocate(size_model)
+atom pos1=allocate(size_vector3)
+atom rot=allocate(size_vector3)
+atom sca=allocate(size_vector3)
+        c_proc(xDrawModelEx,{poke_model(modl,model),poke_vector3(pos1,pos),poke_vector3(rot,rotAxis),rotAng,poke_vector3(sca,scale),bytes_to_int(tint)})
+free(modl)
+free(pos1)
+free(rot)
+free(sca)
 end procedure
 
 public procedure DrawModelWires(sequence model,sequence pos,atom scale,sequence tint)
