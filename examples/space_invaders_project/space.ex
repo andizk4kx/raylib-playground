@@ -1,9 +1,22 @@
 without warning
+/*
+*  see: https://github.com/Memorix101/space_invaders_project
+*  Execute with either
+*
+*  Euphoria eui filename.ex
+*  or
+*  Phix p64 filename.ex
+*
+*/
 --adapted to Phix/Euphoria 2026 Andreas Wagner
+--/*
+--include raylib.e
+include std/os.e
+--*/
 include "..\\..\\raylib64.e"
 
-integer screenWidth=640
-integer screenHeight=480
+integer screenWidth=1024
+integer screenHeight=768
 
 constant Ttexture={0,0,0,0,0}
 enum rec_x,rec_y,rec_width,rec_height
@@ -240,7 +253,8 @@ procedure addEnemy()
 end procedure
 
 procedure initEnemies()
-
+-- itemCount=0
+-- rowCount=0
 for i=0 to MAX_ENEMIES-1 do
     if remainder(i, 10) = 0 
     then
@@ -252,7 +266,6 @@ for i=0 to MAX_ENEMIES-1 do
     itemCount += 1
     addEnemy()
 end for
-
 end procedure
 
 
@@ -300,8 +313,8 @@ procedure updateEnemies()
                 then
                         enemy[e][ene_gol] = 1
                 end if
-
-                if ((enemy[e][ene_pos][rec_x] <= (enemy[e][ene_spos] + enemy[e][ene_rect][rec_width])) and (enemy[e][ene_gol] = 1))
+                --CHECK the +32
+                if ((enemy[e][ene_pos][rec_x]+32 <= (enemy[e][ene_spos] + enemy[e][ene_rect][rec_width])) and (enemy[e][ene_gol] = 1))
                 then
                         enemy[e][ene_gol] = 0
                 end if
@@ -620,7 +633,7 @@ procedure restart()
         score = 0
         --memset(enemy, 0, sizeof(enemy));
         enemy=repeat(0,MAX_ENEMIES)
-        currentFrame = 0.0
+        currentFrame = 0
         --memset(bullets, 0, sizeof(bullets))
         bullets=repeat(0,MAX_BULLETS)
         --memset(enemy_bullets, 0, sizeof(enemy_bullets));
@@ -637,6 +650,7 @@ end procedure
 --int main(int argc, char* argv[]) {
 
         --Start raylib
+        SetConfigFlags(FLAG_WINDOW_RESIZABLE)
         InitWindow(screenWidth, screenHeight, "Space Invaders")
         InitAudioDevice() -- Initialize audio device
         SetTargetFPS(60)
@@ -671,9 +685,10 @@ end procedure
 
         --begin
         BeginDrawing()
-        DrawTexture(fmg_tex, 0, 0, WHITE)
+        --DrawTexture(fmg_tex, 0, 0, WHITE)
+        DrawTexturePro(fmg_tex,{ 0, 0,fmg_tex[tex_width],fmg_tex[tex_height]},{0,0,screenWidth,screenHeight},{0,0},0,WHITE)
         EndDrawing()
-        sleep(2)
+        sleep(1)
         --std::this_thread::sleep_for(std::chrono::milliseconds(2000));
         --UnloadTexture(fmg_splash);
 
@@ -708,6 +723,12 @@ end procedure
         while not(WindowShouldClose())
         do
                 UpdateMusicStream(music)         -- Update music buffer with new stream data
+                if IsWindowResized() 
+                then
+                    screenWidth=GetScreenWidth()
+                    screenHeight=GetScreenHeight()  
+                    player[play_pos][rec_y] = (screenHeight - 60) - player[play_tex][tex_height] / 2
+                end if
                 --DeltaTime = (clock() / CLOCKS_PER_SEC) - lastTick;
                 DeltaTime = time()-lastTick
                 --Handle events on queue
@@ -736,16 +757,17 @@ end procedure
                         updatePlayer() --player
                 end if
                 updateLogic()
-
+                
+                -- CHECK animatorEnemies
                 --int e;
-                for e = 1 to MAX_ENEMIES 
-                do
-                    if sequence(enemy[e]) 
-                    then
-                        enemy[e][ene_rect][rec_x] = currentFrame * 32
-                    end if
-                end for
-                DrawTexture(space, 0, 0, { 255, 255, 255, 255 })
+--              for e = 1 to MAX_ENEMIES 
+--              do
+--                  if sequence(enemy[e]) 
+--                  then
+--                      enemy[e][ene_rect][rec_x] = currentFrame * 32
+--                  end if
+--              end for
+                DrawTexturePro(space,{ 0, 0,space[tex_width],space[tex_height]},{0,0,screenWidth,screenHeight},{0,0},0,WHITE)
 
                 drawExplo()
                 drawEnemies()
@@ -757,13 +779,15 @@ end procedure
                         DrawTexture(player[play_tex], player[play_pos][rec_x], player[play_pos][rec_y], { 255, 255, 255, 255 })
                 else
                         --DrawTextEx(vermin_ttf, "Game Over!", game_over_pos, 64, 0, WHITE);
-                        DrawTexture(gameover_tex, 0, 0, { 255, 255, 255, 255 })
+                        --DrawTexture(gameover_tex, 0, 0, { 255, 255, 255, 255 })
+                        DrawTexturePro(gameover_tex,{ 0, 0,gameover_tex[tex_width],gameover_tex[tex_height]},{0,0,screenWidth,screenHeight},{0,0},0,WHITE)
                 end if
 
                 if (enemies_killed <= 0)
                 then
                         --DrawTextEx(vermin_ttf, "You Win!", youWin_pos, 64, 0, WHITE);
-                        DrawTexture(win_tex, 0, 0, { 255, 255, 255, 255 })
+                        --DrawTexture(win_tex, 0, 0, { 255, 255, 255, 255 })
+                        DrawTexturePro(win_tex,{ 0, 0,win_tex[tex_width],win_tex[tex_height]},{0,0,screenWidth,screenHeight},{0,0},0,WHITE)
                 end if
 
                 --this ugly block is updating the score
@@ -773,13 +797,13 @@ end procedure
 --              lastTick = (clock() / CLOCKS_PER_SEC)
                 lastTick=time()
 --              std::this_thread::sleep_for(std::chrono::milliseconds(30));
-
+                DrawFPS(1,1)
                 EndDrawing()
         end while
 
         UnloadTexture(player[play_tex])
         UnloadTexture(space)
-
+        UnloadTexture(fmg_tex)
         --Quit
         CloseWindow()
 
