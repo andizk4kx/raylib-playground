@@ -86,7 +86,8 @@ integer p_move
 
 --enemy
 constant MAX_ENEMY_BULLETS=100
-constant MAX_ENEMIES=40
+integer MAX_ENEMIES=40
+integer MAX_PLAYER=5
 sequence enemy=repeat(0,MAX_ENEMIES) -- sequence enemy=repeat(enemy_t,MAX_ENEMIES)
 integer currentFrame = 0
 integer enemies_killed = MAX_ENEMIES
@@ -377,7 +378,7 @@ procedure initPlayer()
         player[play_hit][rec_height] = player[play_tex][tex_height]
         player[play_hit][rec_x] = player[play_pos][rec_x]
         player[play_hit][rec_y] = player[play_pos][rec_y]
-        player[play_alive] = 1
+        player[play_alive] = MAX_PLAYER
 end procedure
 
 procedure input()
@@ -613,9 +614,9 @@ procedure updateLogic()
                     and (enemy_bullets[b][ene_bul_pos][rec_x] < player[play_pos][rec_x] + player[play_hit][rec_width]) 
                     and (enemy_bullets[b][ene_bul_pos][rec_y] > player[play_pos][rec_y]) 
                     and (enemy_bullets[b][ene_bul_pos][rec_y] < player[play_pos][rec_y] + player[play_hit][rec_height]) 
-                    and (player[play_alive] = 1))
+                    and (player[play_alive] >= 1))
                 then
-                        player[play_alive] = 0
+                        player[play_alive] -= 1
                         addExplo(player[play_pos][rec_x] - 128 / 2, player[play_pos][rec_y] - 128 / 2)
                         removeEnemyBullet(b)  --???removeEnemyBullet(i)
                         PlaySound(snd_explo)
@@ -644,7 +645,7 @@ procedure restart()
         itemCount = 0
         initEnemies()
         p_move = floor(screenWidth / 2 - player[play_tex][rec_width] / 2)
-        player[play_alive] = 1
+        player[play_alive] = MAX_PLAYER
 end procedure
 
 --int main(int argc, char* argv[]) {
@@ -732,7 +733,7 @@ end procedure
                 --DeltaTime = (clock() / CLOCKS_PER_SEC) - lastTick;
                 DeltaTime = time()-lastTick
                 --Handle events on queue
-                if (IsKeyPressed(KEY_SPACE) and player[play_alive] = 1)
+                if (IsKeyPressed(KEY_SPACE) and player[play_alive] >= 1)
                 then
                         addBullet(player[play_pos][rec_x] + (player[play_tex][rec_width] / 2) - 3, player[play_pos][rec_y]-20)
                         PlaySound(snd_blaster)
@@ -752,7 +753,7 @@ end procedure
                 updateEnemyBullet()
                 updateEnemies()
 
-                if (player[play_alive] = 1)
+                if (player[play_alive] >= 1)
                 then
                         updatePlayer() --player
                 end if
@@ -774,9 +775,12 @@ end procedure
                 drawBullet()
                 drawEnemyBullet()
 
-                if (player[play_alive] = 1) 
+                if (player[play_alive] >= 1) 
                 then
                         DrawTexture(player[play_tex], player[play_pos][rec_x], player[play_pos][rec_y], { 255, 255, 255, 255 })
+                        for i= 1 to player[play_alive]  do
+                            DrawTexture(player[play_tex],i*32, screenHeight-32, WHITE)
+                        end for
                 else
                         --DrawTextEx(vermin_ttf, "Game Over!", game_over_pos, 64, 0, WHITE);
                         --DrawTexture(gameover_tex, 0, 0, { 255, 255, 255, 255 })
@@ -787,6 +791,8 @@ end procedure
                 then
                         --DrawTextEx(vermin_ttf, "You Win!", youWin_pos, 64, 0, WHITE);
                         --DrawTexture(win_tex, 0, 0, { 255, 255, 255, 255 })
+                        --MAX_ENEMIES+=10
+                        --player[play_alive]+=1
                         DrawTexturePro(win_tex,{ 0, 0,win_tex[tex_width],win_tex[tex_height]},{0,0,screenWidth,screenHeight},{0,0},0,WHITE)
                 end if
 
