@@ -80,7 +80,7 @@ sequence space
 sequence screen
 
 --player
-constant MAX_BULLETS = 50
+constant MAX_BULLETS = 10
 sequence player = player_t
 integer p_move
 
@@ -103,7 +103,7 @@ atom DeltaTime
 atom lastTick=0
 integer score = 0
 integer gameover = 0
-
+integer WINNER=0
 --Music
 sequence music
 sequence snd_pusher
@@ -384,11 +384,11 @@ end procedure
 procedure input()
 
         --continuous-response keys
-        if (IsKeyDown(KEY_RIGHT))
+        if (IsKeyDown(KEY_RIGHT)) or (IsGamepadButtonDown(0, GAMEPAD_BUTTON_LEFT_FACE_RIGHT))
         then
                 p_move += 15
         
-        elsif (IsKeyDown(KEY_LEFT))
+        elsif (IsKeyDown(KEY_LEFT)) or (IsGamepadButtonDown(0, GAMEPAD_BUTTON_LEFT_FACE_LEFT))
         then
                 p_move -= 15
         end if
@@ -733,14 +733,26 @@ end procedure
                 --DeltaTime = (clock() / CLOCKS_PER_SEC) - lastTick;
                 DeltaTime = time()-lastTick
                 --Handle events on queue
-                if (IsKeyPressed(KEY_SPACE) and player[play_alive] >= 1)
+                if ((IsKeyPressed(KEY_SPACE) or (IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_TRIGGER_1)))and player[play_alive] >= 1)
                 then
                         addBullet(player[play_pos][rec_x] + (player[play_tex][rec_width] / 2) - 3, player[play_pos][rec_y]-20)
                         PlaySound(snd_blaster)
                 end if
 
-                if (IsKeyPressed(KEY_ENTER))
+                if ((IsKeyPressed(KEY_ENTER))or (IsGamepadButtonDown(0, GAMEPAD_BUTTON_LEFT_TRIGGER_1)))
                 then
+                    if WINNER=1 
+                    then
+                        WINNER=0
+                        MAX_ENEMIES+=10
+                        MAX_PLAYER+=1   
+                    end if
+                    if WINNER=2 
+                    then
+                        WINNER=0
+                        MAX_ENEMIES =40
+                        MAX_PLAYER=5    
+                    end if
                         restart()
                 end if
 
@@ -784,6 +796,7 @@ end procedure
                 else
                         --DrawTextEx(vermin_ttf, "Game Over!", game_over_pos, 64, 0, WHITE);
                         --DrawTexture(gameover_tex, 0, 0, { 255, 255, 255, 255 })
+                        WINNER=2 --Lose
                         DrawTexturePro(gameover_tex,{ 0, 0,gameover_tex[tex_width],gameover_tex[tex_height]},{0,0,screenWidth,screenHeight},{0,0},0,WHITE)
                 end if
 
@@ -793,6 +806,7 @@ end procedure
                         --DrawTexture(win_tex, 0, 0, { 255, 255, 255, 255 })
                         --MAX_ENEMIES+=10
                         --player[play_alive]+=1
+                        WINNER=1
                         DrawTexturePro(win_tex,{ 0, 0,win_tex[tex_width],win_tex[tex_height]},{0,0,screenWidth,screenHeight},{0,0},0,WHITE)
                 end if
 
